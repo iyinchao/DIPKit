@@ -1,0 +1,14 @@
+#include "dipwindow.h"
+#include "ui_dipwindow.h"
+
+DIPWindow::DIPWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::DIPWindow)
+{
+    ui->setupUi(this);
+}
+
+DIPWindow::~DIPWindow()
+{
+    delete ui;
+}
