@@ -51,15 +51,20 @@ public:
         CHANNEL_G = 0x0002,
         CHANNEL_B = 0x0004,
         CHANNEL_A = 0x0010,
-        CHANNEL_S = 0x0020
+        CHANNEL_S = 0x0020,
     };
+    enum HG{
+        ABSOLUTE,
+        RELATIVE
+    };
+
     static int ct(int channel);
     DIPImageView(QWidget *parent = 0);
     DIPImageView(const QString &promptText,QWidget *parent = 0);
     //DIPImageView();
     bool loadImage(QString &path);
     bool isImageLoaded();
-    void displayHistogram(int channel);
+    void displayHistogram(int channel, int mode);
 
     int* getHistoData(int channel = DIPImageView::CHANNEL_S, bool recalculate = false);
 
@@ -79,6 +84,18 @@ private:
     int imgH;
     int imgW;
     int *channelMax;
+    bool isDisplay;
+    int mode;
+    int pd_t = 40;
+    int pd_l = 20;
+    int pd_r = 20;
+    int pd_b = 20;
+    int mg_l = 5;
+    int mg_t = 5;
+    int ct_h = 100;
+    int ct_w = 256;
+    int rc = 5;
+    void __drawEachChannel(QPainter &painter, int channel, int mode);
 protected:
     void paintEvent(QPaintEvent *event);
 public slots:
@@ -88,7 +105,6 @@ public slots:
     void setData(int imageW, int imageH, int** data);
     void display(int channel, int mode);
 public:
-    enum{MODE_ABSOLUTE, MODE_RELATIVE};
     HistoWidget(QWidget *parent = 0);
 };
 
