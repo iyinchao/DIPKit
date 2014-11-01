@@ -2,10 +2,13 @@
 #define DIPKIT_H
 
 #include <QMainWindow>
+#include "dipimageview.h"
 
 namespace Ui {
 class DIPKit;
 }
+
+
 
 class DIPKit : public QMainWindow
 {
@@ -16,7 +19,11 @@ public:
     ~DIPKit();
 
 private:
-    Ui::DIPKit *ui;
+    //Ui::DIPKit *ui;
+    void initUI();
+    DIPImageView *viewer;
 };
+
+
 
 #endif // DIPKit_H

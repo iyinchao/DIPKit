@@ -13,10 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    dipkit.cpp
+    dipkit.cpp \
+    dipimageview.cpp
 
 HEADERS  += \
-    dipkit.h
+    dipkit.h \
+    dipimageview.h
 
 FORMS    += dipkit.ui
 
