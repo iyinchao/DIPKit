@@ -14,11 +14,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     dipkit.cpp \
-    dipimageview.cpp
+    dipimageview.cpp \
+    dipelidelabel.cpp \
+    diphistowidget.cpp \
+    module/test.cpp
 
 HEADERS  += \
     dipkit.h \
-    dipimageview.h
+    dipimageview.h \
+    dipelidelabel.h \
+    diphistowidget.h \
+    module/test.h
 
 FORMS    += dipkit.ui
 

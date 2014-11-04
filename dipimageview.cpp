@@ -24,11 +24,22 @@ void DIPImageView::init(QWidget *parent)
     histoData[ct(DIPImageView::CHANNEL_A)] = NULL;
     histoData[ct(DIPImageView::CHANNEL_S)] = NULL;
 
-    histo = new HistoWidget(parent);
+    histo = new DIPHistoWidget(parent);
     histo->setGeometry(0,0,500,500);
     histo->setVisible(false);
     histo->setAttribute(Qt::WA_TransparentForMouseEvents);
     //histo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    QMenuBar *m = new QMenuBar(parent);
+    QMenu *item = new QMenu(tr("test"));
+    m->addMenu(item);
+    item->addAction(tr("test2"));
+    QWidgetAction *widgetAction=new QWidgetAction(this);
+    QSlider * slider = new QSlider(Qt::Horizontal,this);
+    slider->setFixedSize(500,30);
+    widgetAction->setDefaultWidget(slider);
+    item->addAction(widgetAction);
+    //m->setContentsMargins(0,0,0,0);
 
 
     prompt = new QLabel(tr("No Image"),parent);
@@ -36,7 +47,14 @@ void DIPImageView::init(QWidget *parent)
     prompt->setFont(QFont(tr("Microsoft YaHei"),19, QFont::Bold));
     prompt->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    label = new QLabel();
+    title = new DIPElideLabel(parent);
+    title->setFont(QFont(tr("Microsoft YaHei"),10));
+    title->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    title->setContentsMargins(3,3,3,3);
+    //title->setStyleSheet("QLabel { background-color : #1e1e1a; color : #e1e4e5; }");
+    setTitleText(tr("--"));
+
+    label = new QLabel(parent);
     label->setScaledContents(true);
     label->setAlignment(Qt::AlignCenter);
 
@@ -48,17 +66,29 @@ void DIPImageView::init(QWidget *parent)
 
     layout = new QGridLayout(parent);
 
-    layout->addWidget(scrollArea,0,0);
-    layout->addWidget(prompt,0,0);
-    layout->addWidget(histo,0,0);
+
+
+    layout->addWidget(title,0,0);
+    layout->addWidget(scrollArea,1,0);
+    layout->addWidget(prompt,1,0);
+    layout->addWidget(histo,1,0);
+
+    layout->addWidget(m,2,0);
+
     layout->setContentsMargins(0,0,0,0); //important!
-    layout->addLayout(new QGridLayout(parent),0,0);
+    layout->setSpacing(0);
+    //layout->addLayout(new QGridLayout(parent),0,0);
 
     setLayout(layout);
 
     setMinimumHeight(300);
     setMinimumWidth(300);
 
+}
+
+void DIPImageView::setTitleText(QString &text)
+{
+    title->setText(text);
 }
 
 int DIPImageView::ct(int channel)
@@ -162,201 +192,36 @@ int* DIPImageView::getHistoData(int channel, bool recalculate)
     memset(histoData[ct(DIPImageView::CHANNEL_A)],0,sizeof(int)*256);
     memset(histoData[ct(DIPImageView::CHANNEL_S)],0,sizeof(int)*256);
 
+
+
     for(int i = 0;i < h; i++){
         QRgb* row = (QRgb*)image->scanLine(i);
         for(int j = 0; j < w; j++){
+            histoData[ct(DIPImageView::CHANNEL_A)][qAlpha(row[j])]++;
+            if(qAlpha(row[j]) < 1){
+                continue;
+            }
             histoData[ct(DIPImageView::CHANNEL_R)][qRed(row[j])]++;
             histoData[ct(DIPImageView::CHANNEL_G)][qGreen(row[j])]++;
             histoData[ct(DIPImageView::CHANNEL_B)][qBlue(row[j])]++;
-            histoData[ct(DIPImageView::CHANNEL_A)][qAlpha(row[j])]++;
             histoData[ct(DIPImageView::CHANNEL_S)][qGray(row[j])]++;
+            //if(i == 510 && j == 138) qDebug()<<qAlpha(row[j]);
+
+            /*if(qRed(row[j]) == 0 && qAlpha(row[j]) != 255){
+                t++;
+                qDebug()<<j<<", "<<i<<" Alpha:"<<qAlpha(row[j]) / 2.55;
+            }*/
 
         }
     }
+
+    //histoData[ct(DIPImageView::CHANNEL_R)][0] /= 10;
+
+//    for(int i = 0;i < 256; i++){
+//        //qDebug()<<histoData[ct(DIPImageView::CHANNEL_R)][i];
+//    }
+    //histoData[ct(DIPImageView::CHANNEL_R)][0] = 0;
 
     return histoData[ct(channel)];
-}
-
-HistoWidget::HistoWidget(QWidget *parent)
-    :QWidget(parent)
-{
-    channelMarker = 0x0000;
-
-    isDisplay = false;
-
-    imgH = -1;
-    imgW = -1;
-    channelMax = new int[5];
-
-    pen = QPen();
-    pen.setColor(QColor(255,0,0,100));
-    pen.setCapStyle(Qt::RoundCap);
-    pen.setWidth(2);
-    pen.setStyle(Qt::SolidLine);
-
-    brush = QBrush();
-    brush.setColor(QColor(0,0,0,170));
-    brush.setStyle(Qt::SolidPattern);
-
-
-    //update();
-}
-
-
-void HistoWidget::__drawEachChannel(QPainter &painter, int channel, int mode)
-{
-    QPoint p;
-    QString t;
-    switch(channel){
-    case DIPImageView::CHANNEL_R:
-        pen.setColor(QColor(255,0,0,70));
-        p.setX(mg_l + pd_l + ct_w - 50);
-        p.setY(mg_t + pd_t - 15);
-        t = tr("R");
-        break;
-    case DIPImageView::CHANNEL_G:
-        pen.setColor(QColor(0,255,0,70));
-        p.setX(mg_l + pd_l + ct_w - 40);
-        p.setY(mg_t + pd_t - 15);
-        t = tr("G");
-        break;
-    case DIPImageView::CHANNEL_B:
-        pen.setColor(QColor(0,0,255,70));
-        p.setX(mg_l + pd_l + ct_w - 30);
-        p.setY(mg_t + pd_t - 15);
-        t = tr("B");
-        break;
-    case DIPImageView::CHANNEL_A:
-        pen.setColor(QColor(0,0,0,70));
-        p.setX(mg_l + pd_l + ct_w - 20);
-        p.setY(mg_t + pd_t - 15);
-        t = tr("A");
-        break;
-    case DIPImageView::CHANNEL_S:
-        pen.setColor(QColor(255,255,255,70));
-        p.setX(mg_l + pd_l + ct_w - 10);
-        p.setY(mg_t + pd_t - 15);
-        t = tr("S");
-        break;
-    }
-    painter.setPen(pen);
-
-    painter.setRenderHint(QPainter::Antialiasing, false);
-
-    double h = 0;
-    for(int i = 0; i < 256; i++){
-        if(mode == DIPImageView::HG::ABSOLUTE){
-            h = histoData[DIPImageView::ct(channel)][i] / (double)(imgW * imgH) * 100;
-        }else if(mode == DIPImageView::HG::RELATIVE){
-            h = histoData[DIPImageView::ct(channel)][i] / (double)channelMax[DIPImageView::ct(channel)] * 100;
-        }
-        painter.drawLine(mg_l + pd_l + i, mg_t + pd_t + ct_h, mg_l + pd_l + i, mg_t + pd_t + ct_h - h);
-
-    }
-
-    painter.setRenderHint(QPainter::Antialiasing, true);
-
-    painter.drawText(p, t);
-}
-
-void HistoWidget::paintEvent(QPaintEvent *)
-{
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(brush);
-
-    QRect bgSize;
-    bgSize.setLeft(mg_l);
-    bgSize.setTop(mg_t);
-    bgSize.setBottom(mg_t + pd_t + pd_b + ct_h);
-    bgSize.setRight(mg_l + pd_l + ct_w + pd_r);
-    painter.drawRoundedRect(bgSize, rc, rc, Qt::AbsoluteSize);
-
-    pen.setWidth(1);
-
-    painter.setFont(QFont(tr("Microsoft YaHei"), 8));
-
-    if(channelMarker & DIPImageView::CHANNEL_R){
-        __drawEachChannel(painter, DIPImageView::CHANNEL_R, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_G){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_G, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_B){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_B, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_A){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_A, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_S){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_S, mode);
-    }
-
-    pen.setColor(QColor(255,255,255,100));
-    painter.setPen(pen);
-    painter.drawLine(mg_l + pd_l, mg_t + pd_t, mg_l + pd_l, mg_t + pd_t + ct_h);
-    painter.drawLine(mg_l + pd_l, mg_t + pd_t + ct_h, mg_l + pd_l + ct_w, mg_t + pd_t + ct_h);
-
-    painter.drawText(QPointF(mg_l + pd_l - 8, mg_t + pd_t + ct_h + 12), tr("0"));
-    painter.drawText(QPointF(mg_l + pd_l - 10 + ct_w, mg_t + pd_t + ct_h + 12), tr("255"));
-    if(mode == DIPImageView::HG::RELATIVE)
-        painter.drawText(QPointF(mg_l + pd_l - 14, mg_t + pd_t), tr("1/MAX"));
-    else
-        painter.drawText(QPointF(mg_l + pd_l - 14, mg_t + pd_t), tr("%"));
-
-    painter.drawText(QPointF(mg_l + pd_l + 100, mg_t + pd_t - 20), tr("Histogram"));
-
-}
-
-void HistoWidget::setData(int imageW, int imageH, int **data){
-    imgH = imageH;
-    imgW = imageW;
-    histoData = data;
-
-    int maxR = 0;
-    int maxG = 0;
-    int maxB = 0;
-    int maxA = 0;
-    int maxS = 0;
-
-    for(int i = 0; i < 256; i++){
-        if(histoData[DIPImageView::ct(DIPImageView::CHANNEL_R)][i] > maxR){
-            maxR = histoData[DIPImageView::ct(DIPImageView::CHANNEL_R)][i];
-        }
-        if(histoData[DIPImageView::ct(DIPImageView::CHANNEL_G)][i] > maxG){
-            maxG = histoData[DIPImageView::ct(DIPImageView::CHANNEL_G)][i];
-        }
-        if(histoData[DIPImageView::ct(DIPImageView::CHANNEL_B)][i] > maxB){
-            maxB = histoData[DIPImageView::ct(DIPImageView::CHANNEL_B)][i];
-        }
-        if(histoData[DIPImageView::ct(DIPImageView::CHANNEL_A)][i] > maxA){
-            maxA = histoData[DIPImageView::ct(DIPImageView::CHANNEL_A)][i];
-        }
-        if(histoData[DIPImageView::ct(DIPImageView::CHANNEL_S)][i] > maxS){
-            maxS = histoData[DIPImageView::ct(DIPImageView::CHANNEL_S)][i];
-        }
-    }
-    channelMax[DIPImageView::ct(DIPImageView::CHANNEL_R)] = maxR;
-    channelMax[DIPImageView::ct(DIPImageView::CHANNEL_G)] = maxG;
-    channelMax[DIPImageView::ct(DIPImageView::CHANNEL_B)] = maxB;
-    channelMax[DIPImageView::ct(DIPImageView::CHANNEL_A)] = maxA;
-    channelMax[DIPImageView::ct(DIPImageView::CHANNEL_S)] = maxS;
-
-}
-
-void HistoWidget::display(int channel, int mode)
-{
-    channelMarker = channel;
-    //histoData = data;
-
-    this->mode = mode;
-
-    update();
 }
 

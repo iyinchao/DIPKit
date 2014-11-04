@@ -23,5 +23,7 @@ void DIPKit::initUI()
 
    // qDebug()<<(viewer->getHistoData(DIPImageView::CHANNEL_R))[89];
 
-    viewer->displayHistogram(DIPImageView::CHANNEL_G | DIPImageView::CHANNEL_B | DIPImageView::CHANNEL_R, DIPImageView::HG::RELATIVE);
+    viewer->displayHistogram(DIPImageView::CHANNEL_G | DIPImageView::CHANNEL_B | DIPImageView::CHANNEL_R | DIPImageView::CHANNEL_A | DIPImageView::CHANNEL_S, DIPImageView::HG::RELATIVE);
+    //viewer->displayHistogram(DIPImageView::CHANNEL_R, DIPImageView::HG::RELATIVE);
+
 }

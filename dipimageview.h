@@ -6,23 +6,18 @@
 #include<QScrollArea>
 #include<QLabel>
 #include<QGridLayout>
-#include <QDebug>
-#include <QPainter>
+#include<QDebug>
+#include<QPainter>
 #include<QtMath>
+#include<QMenuBar>
+#include<QMenu>
+#include<QWidgetAction>
+#include<QSlider>
+#include<QFontMetrics>
+#include "dipelidelabel.h"
+#include "diphistowidget.h"
 
-/*QT_BEGIN_NAMESPACE
-class QMenu;
-class QLabel;
-class QPushButton;
-class QScrollArea;
-class QScrollBar;
-class QGridLayout;
-class QScreen;
-class QPlainTextEdit;
-class QImage;
-QT_END_NAMESPACE*/
-
-class HistoWidget;
+class DIPHistoWidget;
 
 class DIPImageView : public QWidget {
     Q_OBJECT
@@ -31,19 +26,20 @@ private:
     QImage *imageSave;
     QLabel *label;
     QLabel *prompt;
+    DIPElideLabel *title;
     QString *filePath;
     QGridLayout *layout;
     QScrollArea *scrollArea;
 
     int **histoData;
-    HistoWidget *histo;
+    DIPHistoWidget *histo;
     QPainter *painter;
     QPen *pen;
 
-
     void init(QWidget *parent = 0);
 
-private slots:
+public slots:
+    void setTitleText(QString &text);
 
 public:
     enum {
@@ -61,51 +57,14 @@ public:
     static int ct(int channel);
     DIPImageView(QWidget *parent = 0);
     DIPImageView(const QString &promptText,QWidget *parent = 0);
-    //DIPImageView();
     bool loadImage(QString &path);
     bool isImageLoaded();
     void displayHistogram(int channel, int mode);
-
     int* getHistoData(int channel = DIPImageView::CHANNEL_S, bool recalculate = false);
-
 
 signals:
     void _imageLoaded();
 
-};
-
-class HistoWidget : public QWidget{
-    Q_OBJECT
-private:
-    QPen pen;
-    QBrush brush;
-    int channelMarker;
-    int **histoData;
-    int imgH;
-    int imgW;
-    int *channelMax;
-    bool isDisplay;
-    int mode;
-    int pd_t = 40;
-    int pd_l = 20;
-    int pd_r = 20;
-    int pd_b = 20;
-    int mg_l = 5;
-    int mg_t = 5;
-    int ct_h = 100;
-    int ct_w = 256;
-    int rc = 5;
-    void __drawEachChannel(QPainter &painter, int channel, int mode);
-protected:
-    void paintEvent(QPaintEvent *event);
-public slots:
-    //void setShape(Shape shape);
-//    void setPen(const QPen &pen);
-//    void setBrush(const QBrush &brush);
-    void setData(int imageW, int imageH, int** data);
-    void display(int channel, int mode);
-public:
-    HistoWidget(QWidget *parent = 0);
 };
 
 #endif // DIPIMAGEVIEW_H
