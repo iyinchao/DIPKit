@@ -5,13 +5,6 @@ DIPImageView::DIPImageView(QWidget *parent)
     init(parent);
 }
 
-DIPImageView::DIPImageView(const QString &promptText, QWidget *parent)
-    :QWidget(parent){
-    init(parent);
-    prompt->setText(promptText);
-
-}
-
 void DIPImageView::init(QWidget *parent)
 {
     image = NULL;
@@ -42,10 +35,10 @@ void DIPImageView::init(QWidget *parent)
     //m->setContentsMargins(0,0,0,0);
 
 
-    prompt = new QLabel(tr("No Image"),parent);
+    /*prompt = new QLabel(tr("No Image"),parent);
     prompt->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     prompt->setFont(QFont(tr("Microsoft YaHei"),19, QFont::Bold));
-    prompt->setAttribute(Qt::WA_TransparentForMouseEvents);
+    prompt->setAttribute(Qt::WA_TransparentForMouseEvents);*/
 
     title = new DIPElideLabel(parent);
     title->setFont(QFont(tr("Microsoft YaHei"),10));
@@ -57,8 +50,10 @@ void DIPImageView::init(QWidget *parent)
     label = new QLabel(parent);
     label->setScaledContents(true);
     label->setAlignment(Qt::AlignCenter);
+    label->setStyleSheet("background-color: rgba(0,0,0,0%)");
 
-    scrollArea = new QScrollArea(parent);
+    scrollArea = new DIPAlphaScrollArea(parent);
+    //scrollArea->setGridSize(10);
     //scrollArea->setBackgroundRole(QPalette::Dark);
 
     //scrollArea->setStyleSheet("background-color:transparent;");
@@ -70,7 +65,7 @@ void DIPImageView::init(QWidget *parent)
 
     layout->addWidget(title,0,0);
     layout->addWidget(scrollArea,1,0);
-    layout->addWidget(prompt,1,0);
+    //layout->addWidget(prompt,1,0);
     layout->addWidget(histo,1,0);
 
     layout->addWidget(m,2,0);
@@ -131,7 +126,6 @@ bool DIPImageView::loadImage(QString &path)
     filePath = new QString(path);
     label->setPixmap(QPixmap::fromImage(*image));
     label->adjustSize();
-    prompt->setVisible(false);
 
     emit _imageLoaded();
 

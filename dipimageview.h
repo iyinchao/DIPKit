@@ -14,8 +14,9 @@
 #include<QWidgetAction>
 #include<QSlider>
 #include<QFontMetrics>
-#include "dipelidelabel.h"
-#include "diphistowidget.h"
+#include"dipelidelabel.h"
+#include"diphistowidget.h"
+#include"dipalphascrollarea.h"
 
 class DIPHistoWidget;
 
@@ -25,11 +26,11 @@ private:
     QImage *image;
     QImage *imageSave;
     QLabel *label;
-    QLabel *prompt;
+    //QLabel *prompt;
     DIPElideLabel *title;
     QString *filePath;
     QGridLayout *layout;
-    QScrollArea *scrollArea;
+    DIPAlphaScrollArea *scrollArea;
 
     int **histoData;
     DIPHistoWidget *histo;
@@ -56,7 +57,6 @@ public:
 
     static int ct(int channel);
     DIPImageView(QWidget *parent = 0);
-    DIPImageView(const QString &promptText,QWidget *parent = 0);
     bool loadImage(QString &path);
     bool isImageLoaded();
     void displayHistogram(int channel, int mode);

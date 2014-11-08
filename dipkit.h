@@ -22,9 +22,9 @@ private:
     //Ui::DIPKit *ui;
     void initUI();
     DIPImageView *viewer;
-    QGridLayout *mainLayout;
-    DIPImageView *leftView;
-    DIPImageView *rightView;
+    QGridLayout *layoutMain;
+    DIPImageView *viewLeft;
+    DIPImageView *viewRight;
 };
 
 
