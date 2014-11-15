@@ -17,22 +17,27 @@ SOURCES += main.cpp \
     dipimageview.cpp \
     dipelidelabel.cpp \
     diphistowidget.cpp \
-    module/test.cpp \
-    dipalphascrollarea.cpp
+    dipalphascrollarea.cpp \
+    diptooldialog.cpp \
+    module/dipmodulebase.cpp \
+    module/dipmoduleht.cpp
 
 HEADERS  += \
     dipkit.h \
     dipelidelabel.h \
     diphistowidget.h \
-    module/test.h \
     dipimageview.h \
-    dipalphascrollarea.h
+    dipalphascrollarea.h \
+    diptooldialog.h \
+    module/dipmodulebase.h \
+    module/dipmoduleht.h
 
 FORMS    += dipkit.ui
 
 OTHER_FILES += \
+    artwork/alpha_bg.ai \
     snippet.txt \
-    artwork/alpha_bg.ai
+    todo.txt
 
 RESOURCES += \
     dipkit.qrc

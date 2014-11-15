@@ -8,6 +8,7 @@ class DIPHistoWidget : public QWidget
 {
     Q_OBJECT
 private:
+    QImage *cache;
     QPen pen;
     QBrush brush;
     int channelMarker;
@@ -26,12 +27,15 @@ private:
     int ct_h = 100;
     int ct_w = 256;
     int rc = 5;
+    bool __redraw;
     void __drawEachChannel(QPainter &painter, int channel, int mode);
 protected:
     void paintEvent(QPaintEvent *event);
 public slots:
     void setData(int imageW, int imageH, int** data);
     void display(int channel, int mode);
+    void hide();
+    void update();
 
 public:
     DIPHistoWidget(QWidget *parent = 0);

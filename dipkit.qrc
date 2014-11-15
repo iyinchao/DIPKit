@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>resource/image/alpha_bg.png</file>
+        <file>resource/icon/blue-open.png</file>
+        <file>resource/icon/histo.png</file>
+        <file>resource/icon/module.png</file>
+        <file>resource/icon/save.png</file>
+        <file>resource/icon/gray-scale.png</file>
     </qresource>
 </RCC>

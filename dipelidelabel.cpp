@@ -30,6 +30,7 @@ void DIPElideLabel::setText(const QString &text){
 
 QString DIPElideLabel::text() const{
     return str;
+
 }
 
 void DIPElideLabel::paintEvent(QPaintEvent *event)

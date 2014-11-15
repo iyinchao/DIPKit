@@ -20,7 +20,10 @@ DIPHistoWidget::DIPHistoWidget(QWidget *parent)
     brush = QBrush();
     brush.setColor(QColor(0,0,0,170));
     brush.setStyle(Qt::SolidPattern);
-    //update();
+
+    cache = new QImage(QSize(pd_l + pd_r + ct_w + 20, pd_t + pd_b + ct_h + 20), QImage::Format_ARGB32);
+    __redraw = true;
+
 }
 
 
@@ -31,32 +34,32 @@ void DIPHistoWidget::__drawEachChannel(QPainter &painter, int channel, int mode)
     switch(channel){
     case DIPImageView::CHANNEL_R:
         pen.setColor(QColor(255,0,0,70));
-        p.setX(mg_l + pd_l + ct_w - 50);
-        p.setY(mg_t + pd_t - 15);
+        p.setX(pd_l + ct_w - 50);
+        p.setY(pd_t - 15);
         t = tr("R");
         break;
     case DIPImageView::CHANNEL_G:
         pen.setColor(QColor(0,255,0,70));
-        p.setX(mg_l + pd_l + ct_w - 40);
-        p.setY(mg_t + pd_t - 15);
+        p.setX(pd_l + ct_w - 40);
+        p.setY(pd_t - 15);
         t = tr("G");
         break;
     case DIPImageView::CHANNEL_B:
         pen.setColor(QColor(0,0,255,70));
-        p.setX(mg_l + pd_l + ct_w - 30);
-        p.setY(mg_t + pd_t - 15);
+        p.setX(pd_l + ct_w - 30);
+        p.setY(pd_t - 15);
         t = tr("B");
         break;
     case DIPImageView::CHANNEL_A:
         pen.setColor(QColor(0,0,0,70));
-        p.setX(mg_l + pd_l + ct_w - 20);
-        p.setY(mg_t + pd_t - 15);
+        p.setX(pd_l + ct_w - 20);
+        p.setY(pd_t - 15);
         t = tr("A");
         break;
     case DIPImageView::CHANNEL_S:
         pen.setColor(QColor(255,255,255,70));
-        p.setX(mg_l + pd_l + ct_w - 10);
-        p.setY(mg_t + pd_t - 15);
+        p.setX(pd_l + ct_w - 10);
+        p.setY(pd_t - 15);
         t = tr("S");
         break;
     }
@@ -80,7 +83,7 @@ void DIPHistoWidget::__drawEachChannel(QPainter &painter, int channel, int mode)
             h = histoData[DIPImageView::ct(channel)][i] / (double)channelMax[DIPImageView::ct(channel)] * 100;
             if(h > 100) h = 100;
         }
-        painter.drawLine(mg_l + pd_l + i, mg_t + pd_t + ct_h, mg_l + pd_l + i, mg_t + pd_t + ct_h - h);
+        painter.drawLine(pd_l + i, pd_t + ct_h, pd_l + i, pd_t + ct_h - h);
     }
 
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -95,57 +98,68 @@ void DIPHistoWidget::__drawEachChannel(QPainter &painter, int channel, int mode)
 
 void DIPHistoWidget::paintEvent(QPaintEvent *)
 {
+    if(!isDisplay){
+        return;
+    }
+
+    if(__redraw){
+        cache->fill(QColor(0,0,0,0));
+
+        QPainter painter(cache);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(brush);
+
+        QRect bgSize;
+        bgSize.setLeft(0);
+        bgSize.setTop(0);
+        bgSize.setBottom(pd_t + pd_b + ct_h);
+        bgSize.setRight(pd_l + ct_w + pd_r);
+        painter.drawRoundedRect(bgSize, rc, rc, Qt::AbsoluteSize);
+
+        pen.setWidth(1);
+        painter.setFont(QFont(tr("Microsoft YaHei"), 8));
+
+        if(channelMarker & DIPImageView::CHANNEL_R){
+            __drawEachChannel(painter, DIPImageView::CHANNEL_R, mode);
+        }
+
+        if(channelMarker & DIPImageView::CHANNEL_G){
+             __drawEachChannel(painter, DIPImageView::CHANNEL_G, mode);
+        }
+
+        if(channelMarker & DIPImageView::CHANNEL_B){
+             __drawEachChannel(painter, DIPImageView::CHANNEL_B, mode);
+        }
+
+        if(channelMarker & DIPImageView::CHANNEL_A){
+             __drawEachChannel(painter, DIPImageView::CHANNEL_A, mode);
+        }
+
+        if(channelMarker & DIPImageView::CHANNEL_S){
+             __drawEachChannel(painter, DIPImageView::CHANNEL_S, mode);
+        }
+
+        pen.setColor(QColor(255,255,255,100));
+        painter.setPen(pen);
+        painter.drawLine(pd_l, pd_t, pd_l, pd_t + ct_h);
+        painter.drawLine(pd_l, pd_t + ct_h, pd_l + ct_w, pd_t + ct_h);
+
+        painter.drawText(QPointF(pd_l - 8, pd_t + ct_h + 12), tr("0"));
+        painter.drawText(QPointF(pd_l - 10 + ct_w, pd_t + ct_h + 12), tr("255"));
+        if(mode == DIPImageView::HG::RELATIVE)
+            painter.drawText(QPointF(pd_l - 14, pd_t), tr("1/MAX"));
+        else
+            painter.drawText(QPointF(pd_l - 14, pd_t), tr("%"));
+
+        painter.drawText(QPointF(pd_l + 100, pd_t - 20), tr("Histogram"));
+
+        __redraw = false;
+    }
 
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(brush);
 
-    QRect bgSize;
-    bgSize.setLeft(mg_l);
-    bgSize.setTop(mg_t);
-    bgSize.setBottom(mg_t + pd_t + pd_b + ct_h);
-    bgSize.setRight(mg_l + pd_l + ct_w + pd_r);
-    painter.drawRoundedRect(bgSize, rc, rc, Qt::AbsoluteSize);
-
-    pen.setWidth(1);
-
-    painter.setFont(QFont(tr("Microsoft YaHei"), 8));
-
-    if(channelMarker & DIPImageView::CHANNEL_R){
-        __drawEachChannel(painter, DIPImageView::CHANNEL_R, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_G){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_G, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_B){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_B, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_A){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_A, mode);
-    }
-
-    if(channelMarker & DIPImageView::CHANNEL_S){
-         __drawEachChannel(painter, DIPImageView::CHANNEL_S, mode);
-    }
-
-    pen.setColor(QColor(255,255,255,100));
-    painter.setPen(pen);
-    painter.drawLine(mg_l + pd_l, mg_t + pd_t, mg_l + pd_l, mg_t + pd_t + ct_h);
-    painter.drawLine(mg_l + pd_l, mg_t + pd_t + ct_h, mg_l + pd_l + ct_w, mg_t + pd_t + ct_h);
-
-    painter.drawText(QPointF(mg_l + pd_l - 8, mg_t + pd_t + ct_h + 12), tr("0"));
-    painter.drawText(QPointF(mg_l + pd_l - 10 + ct_w, mg_t + pd_t + ct_h + 12), tr("255"));
-    if(mode == DIPImageView::HG::RELATIVE)
-        painter.drawText(QPointF(mg_l + pd_l - 14, mg_t + pd_t), tr("1/MAX"));
-    else
-        painter.drawText(QPointF(mg_l + pd_l - 14, mg_t + pd_t), tr("%"));
-
-    painter.drawText(QPointF(mg_l + pd_l + 100, mg_t + pd_t - 20), tr("Histogram"));
-
+    painter.drawImage(mg_l, mg_t, *cache);
 }
 
 void DIPHistoWidget::setData(int imageW, int imageH, int **data){
@@ -192,4 +206,22 @@ void DIPHistoWidget::display(int channel, int mode)
     isDisplay = true;
 
     update();
+}
+
+void DIPHistoWidget::hide()
+{
+    isDisplay = false;
+    update();
+}
+
+void DIPHistoWidget::update()
+{
+    if(isDisplay){
+        delete cache;
+        cache = new QImage(QSize(pd_l + pd_r + ct_w + 20, pd_t + pd_b + ct_h + 20), QImage::Format_ARGB32);
+    }
+
+    __redraw = true;
+
+    QWidget::update();
 }
