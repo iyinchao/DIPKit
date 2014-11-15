@@ -18,7 +18,7 @@ DIPHistoWidget::DIPHistoWidget(QWidget *parent)
     pen.setStyle(Qt::SolidLine);
 
     brush = QBrush();
-    brush.setColor(QColor(0,0,0,170));
+    brush.setColor(QColor(0,0,0,200));
     brush.setStyle(Qt::SolidPattern);
 
     cache = new QImage(QSize(pd_l + pd_r + ct_w + 20, pd_t + pd_b + ct_h + 20), QImage::Format_ARGB32);
@@ -160,6 +160,7 @@ void DIPHistoWidget::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.drawImage(mg_l, mg_t, *cache);
+
 }
 
 void DIPHistoWidget::setData(int imageW, int imageH, int **data){

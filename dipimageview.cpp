@@ -6,7 +6,7 @@ DIPImageView::DIPImageView(QWidget *parent)
 
 }
 
-void DIPImageView::init(QWidget *)
+void DIPImageView::init(QWidget *parent)
 {
     grayMode = false;
     image = NULL;
@@ -19,7 +19,7 @@ void DIPImageView::init(QWidget *)
     histoData[ct(DIPImageView::CHANNEL_A)] = NULL;
     histoData[ct(DIPImageView::CHANNEL_S)] = NULL;
 
-    histo = new DIPHistoWidget(this);
+    histo = new DIPHistoWidget(parent);
     histo->setGeometry(0,0,500,500);
     histo->setVisible(false);
     histo->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -151,7 +151,6 @@ bool DIPImageView::loadImage(const QString &path)
         imageOriginal = NULL;
     }
     image = new QImage(path);
-    qDebug()<<image->format();
     if(image->isNull()){
         delete image;
         image = NULL;
@@ -169,6 +168,7 @@ bool DIPImageView::loadImage(const QString &path)
     getHistoData();
 
     emit _imageLoaded(path);
+    emit _imageSetted();
 
     return true;
 }
@@ -232,7 +232,7 @@ void DIPImageView::displayHistogram(int channel, int mode)
     histo->setVisible(true);
     histo->setData(image->width(),image->height(), histoData);
     histo->display(channel, mode);
-    //histo->update();
+    histo->update();
 }
 
 int DIPImageView::ct(int channel)
@@ -265,7 +265,7 @@ void DIPImageView::hideHistogram()
 
 int* DIPImageView::getHistoData(int channel, bool recalculate)
 {
-    QImage* image = convertToGray(this->image);
+    QImage* image = grayMode?convertToGray(this->image):this->image;
 
     if(!isImageLoaded()){
         return NULL;
@@ -369,6 +369,8 @@ QImage *DIPImageView::setImage(QImage *result)
     label->adjustSize();
 
     getHistoData();
+
+    emit _imageSetted();
 
     return imageOriginal;
 }

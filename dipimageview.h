@@ -69,7 +69,7 @@ public:
     static int ct(int channel);
     DIPImageView(QWidget *parent = 0);
     bool isImageLoaded();
-    void displayHistogram(int channel, int mode);
+    void displayHistogram(int channel, int mode = DIPImageView::HG::RELATIVE);
     void hideHistogram();
     int *getHistoData(int channel = DIPImageView::CHANNEL_S, bool recalculate = true);
     QMenuBar *getMenuBar();
@@ -80,6 +80,7 @@ public:
 signals:
     void _imageLoaded(const QString);
     void _imageSaved(const QString);
+    void _imageSetted();
 
 };
 

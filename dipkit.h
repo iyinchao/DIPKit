@@ -39,6 +39,7 @@ private:
     QMenu *mainFileMenu;
     QMenu *mainProjectMenu;
     QMenu *srcFileMenu;
+    QMenu *resFileMenu;
 
     QAction *projectHTAct;
     QAction *openSrcAct;
@@ -48,6 +49,11 @@ private:
     QAction *histoBSrcAct;
     QAction *histoASrcAct;
     QAction *histoSSrcAct;
+    QAction *histoRResAct;
+    QAction *histoGResAct;
+    QAction *histoBResAct;
+    QAction *histoAResAct;
+    QAction *histoSResAct;
 
     DIPModuleBase *module;
 
@@ -64,6 +70,7 @@ public slots:
     void consoleScrollBottom();
     void clearConsole();
     void applyResultImage(QImage *result, DIPImageView *dest);
+    void displayHistogram();
 
 
 };

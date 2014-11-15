@@ -63,6 +63,8 @@ void DIPKit::initUI()
     setFont(QFont(tr("Microsoft YaHei"),9));
 
     connect(console, SIGNAL(textChanged()), this, SLOT(consoleScrollBottom()));
+    connect(sourceView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
+    connect(resultView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
 
     //mainLayout->addWidget();
 
@@ -70,14 +72,15 @@ void DIPKit::initUI()
 //    mainLayout->addWidget(resultView,0,1,1,1);
 
 
-    //viewer = new DIPImageView(this);
+    //DIPImageView *viewer = new DIPImageView(this);
+    //setCentralWidget(viewer);
     //QString fileName = QFileDialog::getOpenFileName(this, tr("Open a image"),"./",tr("Images (*.png *.bmp *.jpg *.gif);;All Files (*)"));
     //viewer->loadImage(fileName);
-    //sourceView->loadImageWithDialog();
+    //viewer->loadImageWithDialog();
 
    // qDebug()<<(viewer->getHistoData(DIPImageView::CHANNEL_R))[89];
 
-    //sourceView->displayHistogram(DIPImageView::CHANNEL_G | DIPImageView::CHANNEL_B | DIPImageView::CHANNEL_R | DIPImageView::CHANNEL_A | DIPImageView::CHANNEL_S, DIPImageView::HG::RELATIVE);
+    //viewer->displayHistogram(DIPImageView::CHANNEL_G | DIPImageView::CHANNEL_B | DIPImageView::CHANNEL_R | DIPImageView::CHANNEL_A | DIPImageView::CHANNEL_S, DIPImageView::HG::RELATIVE);
     //viewer->displayHistogram(DIPImageView::CHANNEL_R, DIPImageView::HG::RELATIVE);
     //viewer->hideHistogram();
     //fileName = QFileDialog::getSaveFileName(this, tr("Save image"), "./", tr("PNG (*.png);;All Files (*)"));
@@ -90,7 +93,7 @@ void DIPKit::initMenu()
     //main
     mainFileMenu = new QMenu(tr("&File"), this);
     mainProjectMenu = new QMenu(tr("&Projects"), this);
-    projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram & Threshold)"), this);
+    projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram && Threshold)"), this);
 
     mainProjectMenu->addAction(projectHTAct);
 
@@ -103,22 +106,83 @@ void DIPKit::initMenu()
     openSrcAct  = new QAction(QIcon(":/resource/icon/blue-open.png"), tr("&Open a image"), sourceView);
     graySrcAct  = new QAction(QIcon(":/resource/icon/gray-scale.png"), tr("&Gray scale mode"), sourceView);
     histoRSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Red Channel"), sourceView);
+    histoGSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Green Channel"), sourceView);
+    histoBSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Blue Channel"), sourceView);
+    histoASrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Alpha Channel"), sourceView);
+    histoSSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("Gray &Scale Channel"), sourceView);
 
     srcFileMenu = new QMenu(tr("&File"), sourceView);
 
     graySrcAct->setCheckable(true);
     graySrcAct->setChecked(false);
+    histoRSrcAct->setCheckable(true);
+    histoGSrcAct->setCheckable(true);
+    histoBSrcAct->setCheckable(true);
+    histoASrcAct->setCheckable(true);
+    histoSSrcAct->setCheckable(true);
+    histoRSrcAct->setChecked(false);
+    histoGSrcAct->setChecked(false);
+    histoBSrcAct->setChecked(false);
+    histoASrcAct->setChecked(false);
+    histoSSrcAct->setChecked(false);
+
+
     srcFileMenu->addAction(openSrcAct);
     srcFileMenu->addAction(graySrcAct);
     srcFileMenu->addSeparator();
     srcFileMenu->addAction(histoRSrcAct);
+    srcFileMenu->addAction(histoGSrcAct);
+    srcFileMenu->addAction(histoBSrcAct);
+    srcFileMenu->addAction(histoASrcAct);
+    srcFileMenu->addAction(histoSSrcAct);
 
     connect(openSrcAct, SIGNAL(triggered()), sourceView, SLOT(loadImageWithDialog()));
     connect(graySrcAct, SIGNAL(triggered(bool)), sourceView, SLOT(setGrayMode(bool)));
-    //connect(histoRSrcAct, SIGNAL(triggered()), sourceView, SLOT());
+    connect(histoRSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoGSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoBSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoASrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoSSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+
 
     sourceView->getMenuBar()->setStyleSheet("background-color: rgba(0,0,0,0%)");
     sourceView->getMenuBar()->addMenu(srcFileMenu);
+
+    //result
+    //source
+    histoRResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Red Channel"), resultView);
+    histoGResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Green Channel"), resultView);
+    histoBResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Blue Channel"), resultView);
+    histoAResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Alpha Channel"), resultView);
+    histoSResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("Gray &Scale Channel"), resultView);
+    resFileMenu = new QMenu(tr("&File"), resultView);
+
+    histoRResAct->setCheckable(true);
+    histoGResAct->setCheckable(true);
+    histoBResAct->setCheckable(true);
+    histoAResAct->setCheckable(true);
+    histoSResAct->setCheckable(true);
+    histoRResAct->setChecked(false);
+    histoGResAct->setChecked(false);
+    histoBResAct->setChecked(false);
+    histoAResAct->setChecked(false);
+    histoSResAct->setChecked(false);
+
+    resFileMenu->addSeparator();
+    resFileMenu->addAction(histoRResAct);
+    resFileMenu->addAction(histoGResAct);
+    resFileMenu->addAction(histoBResAct);
+    resFileMenu->addAction(histoAResAct);
+    resFileMenu->addAction(histoSResAct);
+
+    connect(histoRResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoGResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoBResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoAResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+    connect(histoSResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
+
+    resultView->getMenuBar()->setStyleSheet("background-color: rgba(0,0,0,0%)");
+    resultView->getMenuBar()->addMenu(resFileMenu);
 
 
    //loadModule();
@@ -161,6 +225,54 @@ void DIPKit::clearConsole()
 void DIPKit::applyResultImage(QImage *result, DIPImageView *dest)
 {
     dest->setImage(result);
+}
+
+void DIPKit::displayHistogram()
+{
+    int channelS = 0;
+    int channelR = 0;
+    if(histoRSrcAct->isChecked()){
+        channelS |= DIPImageView::CHANNEL_R;
+    }
+    if(histoGSrcAct->isChecked()){
+        channelS |= DIPImageView::CHANNEL_G;
+    }
+    if(histoBSrcAct->isChecked()){
+        channelS |= DIPImageView::CHANNEL_B;
+    }
+    if(histoASrcAct->isChecked()){
+        channelS |= DIPImageView::CHANNEL_A;
+    }
+    if(histoSSrcAct->isChecked()){
+        channelS |= DIPImageView::CHANNEL_S;
+    }
+    if(channelS){
+        sourceView->displayHistogram(channelS);
+    }else{
+        sourceView->hideHistogram();
+    }
+
+    if(histoRResAct->isChecked()){
+        channelR |= DIPImageView::CHANNEL_R;
+    }
+    if(histoGResAct->isChecked()){
+        channelR |= DIPImageView::CHANNEL_G;
+    }
+    if(histoBResAct->isChecked()){
+        channelR |= DIPImageView::CHANNEL_B;
+    }
+    if(histoAResAct->isChecked()){
+        channelR |= DIPImageView::CHANNEL_A;
+    }
+    if(histoSResAct->isChecked()){
+        channelR |= DIPImageView::CHANNEL_S;
+    }
+    if(channelR){
+        resultView->displayHistogram(channelR);
+    }else{
+        resultView->hideHistogram();
+    }
+
 }
 
 //void DIPKit::loadModule(QWidget *ui)

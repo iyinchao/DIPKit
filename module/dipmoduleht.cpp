@@ -14,15 +14,36 @@ void DIPModuleHT::initUI()
     histoGB = new QGroupBox(tr("Histogram analysis"), parent);
     histoGBL = new QGridLayout(histoGB);
     histoEquBt = new QPushButton(tr("Histogram Equalization"), histoGB);
+    thresGB = new QGroupBox(tr("Threshold"), parent);
+    thresGBL = new QGridLayout(thresGB);
+    otsuBt = new QPushButton(tr("OTSU algorithm"), thresGB);
+    entropyBt = new QPushButton(tr("Entropy"), thresGB);
+    thresSd = new QSlider(Qt::Horizontal, thresGB);
+    thresLb = new QLabel(tr("Manual"), thresGB);
     mainLt = new QGridLayout(DIPModuleBase::getUI());
 
+    thresSd->setTickInterval(1);
+    thresSd->setTickPosition(QSlider::TicksBelow);
+    thresSd->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    thresSd->setMaximum(255);
+    thresSd->setMinimum(0);
+
     connect(histoEquBt,SIGNAL(clicked()), this, SLOT(__doHistoEqu()));
+    connect(otsuBt,SIGNAL(clicked()), this, SLOT(__doOtsu()));
+    connect(entropyBt,SIGNAL(clicked()), this, SLOT(__doEntropy()));
+    connect(thresSd, SIGNAL(valueChanged(int)), this, SLOT(__doThresManual()));
 
     histoGBL->addWidget(histoEquBt,0,0,1,1,Qt::AlignCenter);
+    thresGBL->addWidget(otsuBt,0,0,1,1,Qt::AlignHCenter);
+    thresGBL->addWidget(entropyBt,1,0,1,1,Qt::AlignHCenter);
+    thresGBL->addWidget(thresSd,2,0,1,1);
+    thresGBL->addWidget(thresLb,3,0,1,1,Qt::AlignHCenter);
 
     histoGB->setLayout(histoGBL);
+    thresGB->setLayout(thresGBL);
 
     mainLt->addWidget(histoGB,0,0,1,1);
+    mainLt->addWidget(thresGB,1,0,1,1);
 
     DIPModuleBase::getUI()->setLayout(mainLt);
 }
@@ -60,12 +81,110 @@ void DIPModuleHT::__doHistoEqu()
         for(int j = 0; j < w; j++){
             int v = hisE[qGray(qRed(row[j]),qGreen(row[j]), qBlue(row[j]))];
             result->setPixel(j, i, qRgba(v,v,v, 255));
-            if(i == 10 && j == 10) qDebug()<<v;
         }
     }
 
     emit _resultImage(result, resultView);
     emit _console(tr("Histogram Equalization done."));
+}
+
+void DIPModuleHT::__doOtsu()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Image is not loaded"));
+        return;
+    }
+
+    QImage *source = sourceView->getImage();
+
+    int w = source->width(); //image dimensions
+    int h = source->height();
+
+    int *his = sourceView->getHistoData(DIPImageView::CHANNEL_S, true);
+    double max = 0;
+    int threshold = 0;
+
+    for(int i = 0; i < 255; i++){
+        double N0 = 0;
+        double U0 = 0;
+        double N1 = 0;
+        double U1 = 0;
+        for(int j = 0; j <= i; j++){
+            N0 += his[j];
+            U0 += his[j] * j;
+        }
+        N0 /= double(w*h);
+        if(N0) U0 /= double(N0);
+        for(int j = i+1; j <= 255; j++){
+            N1 += his[j];
+            U1 += his[j] * j;
+        }
+        N1 /= double(w*h);
+        if(N1) U1 /= double(N1);
+        double d = N0 * N1 * (U0 - U1) * (U0 - U1);
+        if(d > max){
+            max = d;
+            threshold = i;
+        }
+    }
+
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0;i < h; i++){
+        QRgb* row = (QRgb*)source->scanLine(i);
+        QRgb* rowResult = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+            int v = qGray(qRed(row[j]),qGreen(row[j]), qBlue(row[j]));
+            rowResult[j] = v >= threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255);
+            //result->setPixel(j, i, v > threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255));
+        }
+    }
+
+    emit _resultImage(result, resultView);
+    emit _console(tr("OTSU operation done. Threshold: %1").arg(threshold));
+}
+
+void DIPModuleHT::__doEntropy()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Image is not loaded"));
+        return;
+    }
+
+    emit _console(tr("Entropy operation done."));
+}
+
+void DIPModuleHT::__doThresManual()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Image is not loaded"));
+        return;
+    }
+
+    QImage *source = sourceView->getImage();
+
+    int w = source->width(); //image dimensions
+    int h = source->height();
+    int threshold = thresSd->value();
+
+    if(threshold >= 255) threshold = 255;
+    if(threshold <= 0) threshold = 0;
+
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0;i < h; i++){
+        QRgb* row = (QRgb*)source->scanLine(i);
+        QRgb* rowResult = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+            int v = qGray(qRed(row[j]),qGreen(row[j]), qBlue(row[j]));
+            rowResult[j] = v >= threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255);
+            //result->setPixel(j, i, v > threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255));
+        }
+    }
+
+    thresLb->setText(QString("Manual Threshold: %1").arg(thresSd->value()));
+
+    emit _resultImage(result, resultView);
+    emit _console(tr("Manual change threshold"));
+
 }
 
 //alg

@@ -4,6 +4,7 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include <QSlider>
+#include <QLabel>
 #include "dipmodulebase.h"
 
 class DIPModuleHT : public DIPModuleBase
@@ -20,13 +21,18 @@ private:
     QGroupBox *thresGB;
     QGridLayout *histoGBL;
     QPushButton *histoEquBt;
+    QGridLayout *thresGBL;
     QPushButton *otsuBt;
     QPushButton *entropyBt;
+    QLabel *thresLb;
     QSlider *thresSd;
     QGridLayout *mainLt;
 
 public slots:
     void __doHistoEqu();
+    void __doOtsu();
+    void __doEntropy();
+    void __doThresManual();
 
 };
 
