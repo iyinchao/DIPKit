@@ -7,7 +7,7 @@ DIPKit::DIPKit(QWidget *parent) :
     QMainWindow(parent)
 {
     module = NULL;
-
+    isViewSync = true;
     initUI();
     initMenu();
     //setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -65,6 +65,10 @@ void DIPKit::initUI()
     connect(console, SIGNAL(textChanged()), this, SLOT(consoleScrollBottom()));
     connect(sourceView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
     connect(resultView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
+    connect(sourceView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
+    connect(sourceView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
+    connect(resultView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
+    connect(resultView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
 
     //mainLayout->addWidget();
 
@@ -93,11 +97,20 @@ void DIPKit::initMenu()
     //main
     mainFileMenu = new QMenu(tr("&File"), this);
     mainProjectMenu = new QMenu(tr("&Projects"), this);
+    viewSyncAct = new QAction(QIcon(":/resource/icon/view-sync.png"), tr("&Sync viewer scroll"), this);
     projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram && Threshold)"), this);
+    projectAGAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 2 (Algebraic && Geometry Operation)"), this);
 
+    viewSyncAct->setCheckable(true);
+    viewSyncAct->setChecked(true);
+
+    mainFileMenu->addAction(viewSyncAct);
     mainProjectMenu->addAction(projectHTAct);
+    mainProjectMenu->addAction(projectAGAct);
 
+    connect(viewSyncAct, SIGNAL(triggered(bool)), this, SLOT(toggleViewSync(bool)));
     connect(projectHTAct, SIGNAL(triggered()), this, SLOT(loadModule()));
+    connect(projectAGAct, SIGNAL(triggered()), this, SLOT(loadModule()));
 
     menuBar()->addMenu(mainFileMenu);
     menuBar()->addMenu(mainProjectMenu);
@@ -149,7 +162,7 @@ void DIPKit::initMenu()
     sourceView->getMenuBar()->addMenu(srcFileMenu);
 
     //result
-    //source
+    saveResAct = new QAction(QIcon(":/resource/icon/save.png"), tr("&Save"), resultView);
     histoRResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Red Channel"), resultView);
     histoGResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Green Channel"), resultView);
     histoBResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Blue Channel"), resultView);
@@ -168,6 +181,7 @@ void DIPKit::initMenu()
     histoAResAct->setChecked(false);
     histoSResAct->setChecked(false);
 
+    resFileMenu->addAction(saveResAct);
     resFileMenu->addSeparator();
     resFileMenu->addAction(histoRResAct);
     resFileMenu->addAction(histoGResAct);
@@ -175,6 +189,7 @@ void DIPKit::initMenu()
     resFileMenu->addAction(histoAResAct);
     resFileMenu->addAction(histoSResAct);
 
+    connect(saveResAct, SIGNAL(triggered()), resultView, SLOT(saveImageWithDialog()));
     connect(histoRResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
     connect(histoGResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
     connect(histoBResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
@@ -197,7 +212,10 @@ void DIPKit::loadModule()
         //QObject *s = sender();
         if(sender() == projectHTAct){
             module = new DIPModuleHT(sourceView, resultView, toolDialog);
+        }else if(sender() == projectAGAct){
+            module = new DIPModuleAG(sourceView, resultView, toolDialog);
         }
+
         toolDialog->loadUI(module->getUI());
         toolDialog->setTitle(module->getModuleName());
         connect(module, SIGNAL(_loadUI(QWidget*)), toolDialog, SLOT(loadUI(QWidget*)));
@@ -273,6 +291,32 @@ void DIPKit::displayHistogram()
         resultView->hideHistogram();
     }
 
+}
+
+void DIPKit::viewSRScrollSync(int value)
+{
+    if(QObject::sender() == NULL || isViewSync == false){
+        return;
+    }else{
+        if(QObject::sender() == sourceView->verticalScrollBar()){
+            resultView->verticalScrollBar()->setValue(value);
+        }else if(QObject::sender() == sourceView->horizontalScrollBar()){
+            resultView->horizontalScrollBar()->setValue(value);
+        }else if(QObject::sender() == resultView->verticalScrollBar()){
+            sourceView->verticalScrollBar()->setValue(value);
+        }else if(QObject::sender() == resultView->horizontalScrollBar()){
+            sourceView->horizontalScrollBar()->setValue(value);
+        }
+    }
+}
+
+void DIPKit::toggleViewSync(bool on)
+{
+    if(on){
+        isViewSync = true;
+    }else{
+        isViewSync = false;
+    }
 }
 
 //void DIPKit::loadModule(QWidget *ui)

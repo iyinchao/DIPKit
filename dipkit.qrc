@@ -6,5 +6,6 @@
         <file>resource/icon/module.png</file>
         <file>resource/icon/save.png</file>
         <file>resource/icon/gray-scale.png</file>
+        <file>resource/icon/view-sync.png</file>
     </qresource>
 </RCC>

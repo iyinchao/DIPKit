@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     dipalphascrollarea.cpp \
     diptooldialog.cpp \
     module/dipmodulebase.cpp \
-    module/dipmoduleht.cpp
+    module/dipmoduleht.cpp \
+    module/dipmoduleag.cpp
 
 HEADERS  += \
     dipkit.h \
@@ -30,7 +31,8 @@ HEADERS  += \
     dipalphascrollarea.h \
     diptooldialog.h \
     module/dipmodulebase.h \
-    module/dipmoduleht.h
+    module/dipmoduleht.h \
+    module/dipmoduleag.h
 
 FORMS    += dipkit.ui
 

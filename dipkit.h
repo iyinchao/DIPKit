@@ -11,6 +11,7 @@
 
 #include "module/dipmodulebase.h"
 #include "module/dipmoduleht.h"
+#include "module/dipmoduleag.h"
 
 namespace Ui {
 class DIPKit;
@@ -26,7 +27,7 @@ public:
 
 private:
     //Ui::DIPKit *ui;
-
+    bool isViewSync;
     QWidget *mainWidget;
     QGridLayout *mainLayout;
     QSplitter *mainSplitter;
@@ -41,7 +42,9 @@ private:
     QMenu *srcFileMenu;
     QMenu *resFileMenu;
 
+    QAction *viewSyncAct;
     QAction *projectHTAct;
+    QAction *projectAGAct;
     QAction *openSrcAct;
     QAction *graySrcAct;
     QAction *histoRSrcAct;
@@ -49,6 +52,7 @@ private:
     QAction *histoBSrcAct;
     QAction *histoASrcAct;
     QAction *histoSSrcAct;
+    QAction *saveResAct;
     QAction *histoRResAct;
     QAction *histoGResAct;
     QAction *histoBResAct;
@@ -71,7 +75,8 @@ public slots:
     void clearConsole();
     void applyResultImage(QImage *result, DIPImageView *dest);
     void displayHistogram();
-
+    void viewSRScrollSync(int value);
+    void toggleViewSync(bool on);
 
 };
 

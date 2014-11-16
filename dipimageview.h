@@ -13,6 +13,7 @@
 #include<QMenu>
 #include<QWidgetAction>
 #include<QSlider>
+#include <QScrollBar>
 #include<QFontMetrics>
 #include<QFileDialog>
 #include<QImageReader>
@@ -76,6 +77,8 @@ public:
     QImage *getImage();
     QImage *setImage(QImage *result);
     QImage *convertToGray(QImage *source);
+    QScrollBar *verticalScrollBar();
+    QScrollBar *horizontalScrollBar();
 
 signals:
     void _imageLoaded(const QString);

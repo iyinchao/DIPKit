@@ -143,6 +143,7 @@ void DIPModuleHT::__doOtsu()
     emit _console(tr("OTSU operation done. Threshold: %1").arg(threshold));
 }
 
+//http://www.johnloomis.org/ece563/notes/basics/entropy/entropy.html
 void DIPModuleHT::__doEntropy()
 {
     if(!sourceView->isImageLoaded()){
@@ -150,7 +151,64 @@ void DIPModuleHT::__doEntropy()
         return;
     }
 
-    emit _console(tr("Entropy operation done."));
+    QImage *source = sourceView->getImage();
+    int w = source->width(); //image dimensions
+    int h = source->height();
+    int *his = sourceView->getHistoData(DIPImageView::CHANNEL_S, false);
+
+    double hisN[256] ={0}; //normalized histogram
+
+    for(int i = 0; i < 256; i++){
+        hisN[i] = double(his[i]) / double(w * h);
+    }
+
+    double max;
+    int threshold = 0;
+
+    for(int i = 0; i < 256; i++){
+        double h1 = 0; //sum of probablity of black set
+        double h2 = 0;
+        double HB = 0; //entropy of black set;
+        double HW = 0; //entropy of white set;
+        for(int j = 0; j < 256; j++){
+            if(j <= i){
+                h1 += hisN[j];
+            }else{
+                h2 += hisN[j];
+            }
+        }
+        for(int j = 0; j < 256; j++){
+            if(hisN[j] == 0) continue;
+            if(j <= i){
+                HB -= (hisN[j] / h1) * qLn(hisN[j] / h1);
+            }else{
+                HW -= (hisN[j] / h2) * qLn(hisN[j] / h2);
+            }
+        }
+
+        if(i == 0){
+            max = HB + HW;
+            threshold = 0;
+        }else{
+            if((HB + HW) > max){
+                max = (HB + HW);
+                threshold = i;
+            }
+        }
+    }
+
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0;i < h; i++){
+        QRgb* row = (QRgb*)source->scanLine(i);
+        QRgb* rowResult = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+            int v = qGray(qRed(row[j]),qGreen(row[j]), qBlue(row[j]));
+            rowResult[j] = v >= threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255);
+        }
+    }
+
+    emit _resultImage(result, resultView);
+    emit _console(tr("Entropy operation done. Threshold: %1").arg(threshold));
 }
 
 void DIPModuleHT::__doThresManual()
@@ -183,7 +241,7 @@ void DIPModuleHT::__doThresManual()
     thresLb->setText(QString("Manual Threshold: %1").arg(thresSd->value()));
 
     emit _resultImage(result, resultView);
-    emit _console(tr("Manual change threshold"));
+    emit _console(QString(tr("Manual change threshold: %1")).arg(threshold));
 
 }
 

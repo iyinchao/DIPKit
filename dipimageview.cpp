@@ -100,6 +100,9 @@ bool DIPImageView::saveImage(const QString &path, const char* ext)
 
 const QString DIPImageView::saveImageWithDialog()
 {
+    if(!isImageLoaded()){
+        return QString("");
+    }
     QStringList mimeTypeFilters;
     foreach (const QByteArray &mimeTypeName, QImageWriter::supportedMimeTypes())
         mimeTypeFilters.append(mimeTypeName);
@@ -390,5 +393,15 @@ QImage *DIPImageView::convertToGray(QImage *source)
     }
 
     return result;
+}
+
+QScrollBar *DIPImageView::verticalScrollBar()
+{
+    return scrollArea->verticalScrollBar();
+}
+
+QScrollBar *DIPImageView::horizontalScrollBar()
+{
+    return scrollArea->horizontalScrollBar();
 }
 

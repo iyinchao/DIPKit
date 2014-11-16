@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGridLayout>
+#include <QtMath>
 #include "../dipimageview.h"
 
 class DIPModuleBase: public QObject

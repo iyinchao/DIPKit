@@ -1,3 +1,10 @@
 Mouse color pick
 QSettings intergration
 
+save function
+hide tool dialog
+sync source & result
+more console info
+viewertitle text
+swap image in alg
+scale image, size too big?
