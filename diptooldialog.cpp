@@ -37,9 +37,14 @@ void DIPToolDialog::loadUI(QWidget *ui)
     //rootLayout->activate();
     this->adjustSize();
     //setLayout(rootLayout);
-
     //update();
     //rootLayout->
+}
+
+void DIPToolDialog::adjustDialogSize()
+{
+    this->adjustSize();
+    //qDebug()<<"ok"<<sizeHint()<<", "<<minimumSizeHint();
 }
 
 

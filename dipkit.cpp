@@ -29,6 +29,9 @@ void DIPKit::initUI()
     resultView = new DIPImageView(mainSplitter);
     console = new QPlainTextEdit(mainSplitter);
 
+    sourceView->setTitle(tr("Source"), DIPImageView::TITLE::NAME);
+    resultView->setTitle(tr("Result"), DIPImageView::TITLE::NAME);
+
     viewLayout->setContentsMargins(0,0,0,0);
     viewLayout->addWidget(sourceView,0,0,1,1);
     viewLayout->addWidget(resultView,0,1,1,1);
@@ -63,8 +66,8 @@ void DIPKit::initUI()
     setFont(QFont(tr("Microsoft YaHei"),9));
 
     connect(console, SIGNAL(textChanged()), this, SLOT(consoleScrollBottom()));
-    connect(sourceView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
-    connect(resultView, SIGNAL(_imageSetted()), this, SLOT(displayHistogram()));
+    connect(sourceView, SIGNAL(_imageIsSet()), this, SLOT(displayHistogram()));
+    connect(resultView, SIGNAL(_imageIsSet()), this, SLOT(displayHistogram()));
     connect(sourceView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
     connect(sourceView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
     connect(resultView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
@@ -98,25 +101,38 @@ void DIPKit::initMenu()
     mainFileMenu = new QMenu(tr("&File"), this);
     mainProjectMenu = new QMenu(tr("&Projects"), this);
     viewSyncAct = new QAction(QIcon(":/resource/icon/view-sync.png"), tr("&Sync viewer scroll"), this);
+    toggleToolAct = new QAction(QIcon(":/resource/icon/tool-dialog.png"), tr("&Toggle tool dialog"), this);
     projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram && Threshold)"), this);
     projectAGAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 2 (Algebraic && Geometry Operation)"), this);
+    projectCVAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 3 (Convolution && Filters)"), this);
+    projectMMAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 4 (Mathematical morphology)"), this);
 
     viewSyncAct->setCheckable(true);
     viewSyncAct->setChecked(true);
+    toggleToolAct->setCheckable(true);
+    toggleToolAct->setChecked(true);
+    //projectHTAct->setIconText();
 
     mainFileMenu->addAction(viewSyncAct);
+    mainFileMenu->addAction(toggleToolAct);
     mainProjectMenu->addAction(projectHTAct);
     mainProjectMenu->addAction(projectAGAct);
+    mainProjectMenu->addAction(projectCVAct);
+    mainProjectMenu->addAction(projectMMAct);
 
     connect(viewSyncAct, SIGNAL(triggered(bool)), this, SLOT(toggleViewSync(bool)));
+    connect(toggleToolAct, SIGNAL(triggered(bool)), this, SLOT(toggleTool(bool)));
     connect(projectHTAct, SIGNAL(triggered()), this, SLOT(loadModule()));
     connect(projectAGAct, SIGNAL(triggered()), this, SLOT(loadModule()));
+    connect(projectCVAct, SIGNAL(triggered()), this, SLOT(loadModule()));
+    connect(projectMMAct, SIGNAL(triggered()), this, SLOT(loadModule()));
 
     menuBar()->addMenu(mainFileMenu);
     menuBar()->addMenu(mainProjectMenu);
 
     //source
     openSrcAct  = new QAction(QIcon(":/resource/icon/blue-open.png"), tr("&Open a image"), sourceView);
+    saveSrcAct = new QAction(QIcon(":/resource/icon/save.png"), tr("&Save"), sourceView);
     graySrcAct  = new QAction(QIcon(":/resource/icon/gray-scale.png"), tr("&Gray scale mode"), sourceView);
     histoRSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Red Channel"), sourceView);
     histoGSrcAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Green Channel"), sourceView);
@@ -141,6 +157,7 @@ void DIPKit::initMenu()
 
 
     srcFileMenu->addAction(openSrcAct);
+    srcFileMenu->addAction(saveSrcAct);
     srcFileMenu->addAction(graySrcAct);
     srcFileMenu->addSeparator();
     srcFileMenu->addAction(histoRSrcAct);
@@ -150,6 +167,7 @@ void DIPKit::initMenu()
     srcFileMenu->addAction(histoSSrcAct);
 
     connect(openSrcAct, SIGNAL(triggered()), sourceView, SLOT(loadImageWithDialog()));
+    connect(saveSrcAct, SIGNAL(triggered()), sourceView, SLOT(saveImageWithDialog()));
     connect(graySrcAct, SIGNAL(triggered(bool)), sourceView, SLOT(setGrayMode(bool)));
     connect(histoRSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
     connect(histoGSrcAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
@@ -162,6 +180,7 @@ void DIPKit::initMenu()
     sourceView->getMenuBar()->addMenu(srcFileMenu);
 
     //result
+    forwardAct = new QAction(QIcon(":/resource/icon/forward-left.png"), tr("&Forward to source"), resultView);
     saveResAct = new QAction(QIcon(":/resource/icon/save.png"), tr("&Save"), resultView);
     histoRResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Red Channel"), resultView);
     histoGResAct = new QAction(QIcon(":/resource/icon/histo.png"), tr("&Green Channel"), resultView);
@@ -181,6 +200,7 @@ void DIPKit::initMenu()
     histoAResAct->setChecked(false);
     histoSResAct->setChecked(false);
 
+    resFileMenu->addAction(forwardAct);
     resFileMenu->addAction(saveResAct);
     resFileMenu->addSeparator();
     resFileMenu->addAction(histoRResAct);
@@ -189,6 +209,7 @@ void DIPKit::initMenu()
     resFileMenu->addAction(histoAResAct);
     resFileMenu->addAction(histoSResAct);
 
+    connect(forwardAct, SIGNAL(triggered()), sourceView, SLOT(receiveImage()));
     connect(saveResAct, SIGNAL(triggered()), resultView, SLOT(saveImageWithDialog()));
     connect(histoRResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
     connect(histoGResAct, SIGNAL(triggered()), this, SLOT(displayHistogram()));
@@ -214,6 +235,10 @@ void DIPKit::loadModule()
             module = new DIPModuleHT(sourceView, resultView, toolDialog);
         }else if(sender() == projectAGAct){
             module = new DIPModuleAG(sourceView, resultView, toolDialog);
+        }else if(sender() == projectCVAct){
+            module = new DIPModuleCV(sourceView, resultView, toolDialog);
+        }else if(sender() == projectMMAct){
+            module = new DIPModuleMM(sourceView, resultView, toolDialog);
         }
 
         toolDialog->loadUI(module->getUI());
@@ -221,6 +246,7 @@ void DIPKit::loadModule()
         connect(module, SIGNAL(_loadUI(QWidget*)), toolDialog, SLOT(loadUI(QWidget*)));
         connect(module, SIGNAL(_console(const QString &)), this, SLOT(writeConsole(QString)));
         connect(module, SIGNAL(_resultImage(QImage*,DIPImageView*)), this, SLOT(applyResultImage(QImage*,DIPImageView*)));
+        connect(module, SIGNAL(_adjustDialogSize()), toolDialog, SLOT(adjustDialogSize()));
     }
 }
 
@@ -314,8 +340,19 @@ void DIPKit::toggleViewSync(bool on)
 {
     if(on){
         isViewSync = true;
+        resultView->verticalScrollBar()->setValue(sourceView->verticalScrollBar()->value());
+        resultView->horizontalScrollBar()->setValue(sourceView->horizontalScrollBar()->value());
     }else{
         isViewSync = false;
+    }
+}
+
+void DIPKit::toggleTool(bool show)
+{
+    if(show){
+        toolDialog->show();
+    }else{
+        toolDialog->hide();
     }
 }
 

@@ -12,6 +12,8 @@
 #include "module/dipmodulebase.h"
 #include "module/dipmoduleht.h"
 #include "module/dipmoduleag.h"
+#include "module/dipmodulecv.h"
+#include "module/dipmodulemm.h"
 
 namespace Ui {
 class DIPKit;
@@ -43,15 +45,20 @@ private:
     QMenu *resFileMenu;
 
     QAction *viewSyncAct;
+    QAction *toggleToolAct;
     QAction *projectHTAct;
     QAction *projectAGAct;
+    QAction *projectCVAct;
+    QAction *projectMMAct;
     QAction *openSrcAct;
     QAction *graySrcAct;
+    QAction *saveSrcAct;
     QAction *histoRSrcAct;
     QAction *histoGSrcAct;
     QAction *histoBSrcAct;
     QAction *histoASrcAct;
     QAction *histoSSrcAct;
+    QAction *forwardAct;
     QAction *saveResAct;
     QAction *histoRResAct;
     QAction *histoGResAct;
@@ -77,6 +84,7 @@ public slots:
     void displayHistogram();
     void viewSRScrollSync(int value);
     void toggleViewSync(bool on);
+    void toggleTool(bool show);
 
 };
 

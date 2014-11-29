@@ -9,6 +9,9 @@ DIPImageView::DIPImageView(QWidget *parent)
 void DIPImageView::init(QWidget *parent)
 {
     grayMode = false;
+    titleName = NULL;
+    titleInfo = NULL;
+    titleOption = NULL;
     image = NULL;
     imageOriginal = NULL;
     filePath = NULL;
@@ -49,10 +52,11 @@ void DIPImageView::init(QWidget *parent)
     title->setFont(QFont(tr("Microsoft YaHei"),10));
     title->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     title->setContentsMargins(3,3,3,3);
+    title->setText(QString("--"));
     //title->setStyleSheet("QLabel { background-color : #1e1e1a; color : #e1e4e5; }");
-    setTitleText(tr("--"));
+    //setTitle(tr("--"));
 
-    label = new QLabel(this);
+    label = new DIPImageLabel(this);
     label->setScaledContents(true);
     label->setAlignment(Qt::AlignCenter);
     label->setStyleSheet("background-color: rgba(0,0,0,0%)");
@@ -63,9 +67,9 @@ void DIPImageView::init(QWidget *parent)
 
     //scrollArea->setStyleSheet("background-color:transparent;");
     scrollArea->setWidget(label);
+    connect(label, SIGNAL(__adjustSize(int,int)), scrollArea, SLOT(contentResize(int,int)));
 
     layout = new QGridLayout(this);
-
 
     layout->addWidget(title,0,0);
     layout->addWidget(scrollArea,1,0);
@@ -83,9 +87,68 @@ void DIPImageView::init(QWidget *parent)
 
 }
 
-void DIPImageView::setTitleText(QString &text)
+void DIPImageView::paintEvent(QPaintEvent *event)
 {
-    title->setText(text);
+    QWidget::paintEvent(event);
+
+//    if(isColorPick){
+//        QPainter painter(this);
+//        QPen pen = QPen();
+//        QBrush brush = QBrush();
+//        int w = 60;
+//        int h = 35;
+//        int rc = 5;
+
+
+//        brush.setColor(QColor(0,0,0,150));
+//        brush.setStyle(Qt::SolidPattern);
+//        painter.setRenderHint(QPainter::Antialiasing, true);
+
+//        painter.setPen(Qt::NoPen);
+//        painter.setBrush(brush);
+//        painter.drawRoundedRect(10,10,w,h,rc,rc,Qt::AbsoluteSize);
+//    }
+}
+
+void DIPImageView::setTitle(QString &text, TITLE component)
+{
+    if(component == TITLE::ALL){
+        if(titleName){
+            delete titleName;
+            titleName = NULL;
+        }
+        if(titleOption){
+            delete titleOption;
+            titleOption = NULL;
+        }
+        if(titleInfo){
+            delete titleInfo;
+        }
+        titleInfo = new QString(text);
+    }
+    if(component == TITLE::NAME){
+        if(titleName){
+            delete titleName;
+        }
+        titleName = new QString(text);
+    }
+    QString s = QString("");
+    if(titleName){
+        s.append(QString("<b>%1</b>").arg(*titleName));
+    }
+    if(titleName && titleInfo){
+        s.append(" - ");
+    }
+    if(titleInfo){
+        s.append(*titleInfo);
+    }
+    if(titleOption && titleInfo){
+        s.append(" - ");
+    }
+    if(titleOption){
+        s.append(*titleOption);
+    }
+    title->setText(s);
 }
 
 bool DIPImageView::saveImage(const QString &path, const char* ext)
@@ -153,12 +216,13 @@ bool DIPImageView::loadImage(const QString &path)
         delete imageOriginal;
         imageOriginal = NULL;
     }
-    image = new QImage(path);
-    if(image->isNull()){
-        delete image;
-        image = NULL;
+    QImage *temp = new QImage(path);
+    if(temp->isNull()){
+        delete temp;
         return false;
     }
+    image = new QImage(temp->convertToFormat(QImage::Format_ARGB32));
+    delete temp;
     if(filePath != NULL)delete filePath;
     filePath = new QString(path);
     if(grayMode){
@@ -171,7 +235,7 @@ bool DIPImageView::loadImage(const QString &path)
     getHistoData();
 
     emit _imageLoaded(path);
-    emit _imageSetted();
+    emit _imageIsSet();
 
     return true;
 }
@@ -223,7 +287,8 @@ bool DIPImageView::isImageLoaded()
 {
     //return !prompt->isVisible();
     //qDebug()<<image->isNull();
-    return ! image == NULL;
+    //qDebug()<<image;
+    return ! (image == NULL || image->isNull());
 }
 
 void DIPImageView::displayHistogram(int channel, int mode)
@@ -344,7 +409,7 @@ QMenuBar *DIPImageView::getMenuBar()
 QImage *DIPImageView::getImage()
 {
     if(image == NULL || image->isNull()){
-        return 0;
+        return NULL;
     }else{
         if(grayMode){
             return convertToGray(image);
@@ -353,7 +418,7 @@ QImage *DIPImageView::getImage()
     }
 }
 
-QImage *DIPImageView::setImage(QImage *result)
+QImage *DIPImageView::setImage(QImage *result, QString *info)
 {
     if(imageOriginal != NULL){
         delete imageOriginal;
@@ -373,9 +438,54 @@ QImage *DIPImageView::setImage(QImage *result)
 
     getHistoData();
 
-    emit _imageSetted();
+    if(info){
+
+    }
+
+    emit _imageIsSet();
 
     return imageOriginal;
+}
+
+QImage *DIPImageView::receiveImage()
+{
+    if(!sender()){
+        return NULL;
+    }
+    DIPImageView *s = (DIPImageView*)(sender()->parent());
+    //qDebug()<<s->isImageLoaded();
+    if(s->isImageLoaded()){
+        QImage *temp = new QImage(*(this->getImage()));
+        this->setImage(new QImage(*(s->getImage())));
+        s->clearImage();
+        return temp;
+    }else{
+        return NULL;
+    }
+}
+
+QImage *DIPImageView::clearImage()
+{
+    if(this->isImageLoaded()){
+        QImage *temp = new QImage(*(this->getImage()));
+        label->clear();
+        if(image != NULL){
+            delete image;
+            image = NULL;
+        }
+        if(imageOriginal != NULL){
+            delete imageOriginal;
+            imageOriginal = NULL;
+        }
+        if(filePath != NULL){
+            delete filePath;
+            filePath = NULL;
+        }
+        histo->setVisible(false);
+        return temp;
+    }else{
+        return NULL;
+    }
 }
 
 QImage *DIPImageView::convertToGray(QImage *source)

@@ -1,0 +1,9 @@
+ //将tool box 每次改变控件visible的时候都自动fit to content
+ //需要对每个 dialog layout 里面的进行adjust size.
+ edgeGB->adjustSize();
+ filterGB->adjustSize();
+ filterGB->resize(edgeGB->size().width(), filterGB->size().height());
+ DIPModuleBase::getUI()->adjustSize();
+
+//使用convertToFormat来改变QImage格式
+converted = source->convertToFormat( QImage::Format_RGB888 ) //此句不改变source

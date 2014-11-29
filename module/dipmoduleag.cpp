@@ -35,6 +35,7 @@ void DIPModuleAG::initUI()
     rotateL = new QLabel(tr("Rotate (degree):"), geoGB);
     scaleL = new QLabel(tr("Scale:"), geoGB);
 
+    opView->setTitle(tr("Operand"), DIPImageView::TITLE::NAME);
     addBt->setMaximumSize(40, 30);
     minusBt->setMaximumSize(40, 30);
     divideBt->setMaximumSize(40, 30);
@@ -45,12 +46,12 @@ void DIPModuleAG::initUI()
     multiplyBt->setFont(QFont(tr("Microsoft YaHei"),15));
     nearRB->setChecked(true);
     biliRB->setContentsMargins(0,0,0,10);
-    rotateSd->setTickInterval(1);
+    //rotateSd->setTickInterval(1);
     rotateSd->setTickPosition(QSlider::TicksBelow);
     rotateSd->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     rotateSd->setMaximum(360);
     rotateSd->setMinimum(0);
-    scaleSd->setTickInterval(1);
+    //scaleSd->setTickInterval(1);
     scaleSd->setTickPosition(QSlider::TicksBelow);
     scaleSd->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     scaleSd->setMaximum(100);
@@ -90,7 +91,7 @@ void DIPModuleAG::initUI()
     connect(histoBOpAct, SIGNAL(triggered()), this, SLOT(__displayHistogram()));
     connect(histoAOpAct, SIGNAL(triggered()), this, SLOT(__displayHistogram()));
     connect(histoSOpAct, SIGNAL(triggered()), this, SLOT(__displayHistogram()));
-    connect(opView, SIGNAL(_imageSetted()), this, SLOT(__displayHistogram()));
+    connect(opView, SIGNAL(_imageIsSet()), this, SLOT(__displayHistogram()));
 
     algGB->setLayout(algGBL);
     algGBL->addWidget(opView,0,0,1,4);
@@ -240,17 +241,17 @@ void DIPModuleAG::__doAlgebraic()
                         a = qAlpha(row[j]);
                  }
                  if(sender() == multiplyBt){
-                    r = dipRed(row[j]) * dipRed(rowOprand[j]);
-                    g = dipGreen(row[j]) * dipGreen(rowOprand[j]);
-                    b = dipBlue(row[j]) * dipBlue(rowOprand[j]);
-                    a = qAlpha(row[j]) * qAlpha(rowOprand[j]);
+                    r = qRound(dipRed(row[j]) * dipRed(rowOprand[j]) / double(255));
+                    g = qRound(dipGreen(row[j]) * dipGreen(rowOprand[j]) / double(255));
+                    b = qRound(dipBlue(row[j]) * dipBlue(rowOprand[j]) / double(255));
+                    a = qRound(qAlpha(row[j]) * qAlpha(rowOprand[j]) / double(255));
                  }
                  if(sender() == divideBt){
-                    (dipRed(rowOprand[j]) == 0) ? (r = 255) : (r = 255 * qRound(double(dipRed(row[j])) / dipRed(rowOprand[j])));
-                    (dipGreen(rowOprand[j]) == 0) ? (g = 255) : (g = 255 * qRound(double(dipGreen(row[j])) / dipGreen(rowOprand[j])));
-                    (dipBlue(rowOprand[j]) == 0) ? (b = 255) : (b = 255 * qRound(double(dipBlue(row[j])) / dipBlue(rowOprand[j])));
+                    (dipRed(rowOprand[j]) == 0) ? (r = 0) : (r = 255 * qRound(double(dipRed(row[j])) / dipRed(rowOprand[j])));
+                    (dipGreen(rowOprand[j]) == 0) ? (g = 0) : (g = 255 * qRound(double(dipGreen(row[j])) / dipGreen(rowOprand[j])));
+                    (dipBlue(rowOprand[j]) == 0) ? (b = 0) : (b = 255 * qRound(double(dipBlue(row[j])) / dipBlue(rowOprand[j])));
                     if(qAlpha(row[j]) != qAlpha(rowOprand[j]))
-                        (qAlpha(rowOprand[j]) == 0) ? (a = 255) : (a = 255 * qRound(double(qAlpha(row[j])) / qAlpha(rowOprand[j])));
+                        (qAlpha(rowOprand[j]) == 0) ? (a = 0) : (a = 255 * qRound(double(qAlpha(row[j])) / qAlpha(rowOprand[j])));
                     else
                         a = qAlpha(row[j]);
                  }

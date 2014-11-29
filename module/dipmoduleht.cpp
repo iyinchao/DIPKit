@@ -22,7 +22,7 @@ void DIPModuleHT::initUI()
     thresLb = new QLabel(tr("Manual"), thresGB);
     mainLt = new QGridLayout(DIPModuleBase::getUI());
 
-    thresSd->setTickInterval(1);
+    //thresSd->setTickInterval(1);
     thresSd->setTickPosition(QSlider::TicksBelow);
     thresSd->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     thresSd->setMaximum(255);

@@ -1,27 +1,28 @@
 #ifndef DIPIMAGEVIEW_H
 #define DIPIMAGEVIEW_H
 
-#include<memory>
-#include<QWidget>
-#include<QScrollArea>
-#include<QLabel>
-#include<QGridLayout>
-#include<QDebug>
-#include<QPainter>
-#include<QtMath>
-#include<QMenuBar>
-#include<QMenu>
-#include<QWidgetAction>
-#include<QSlider>
+#include <memory>
+#include <QWidget>
+#include <QScrollArea>
+#include <QLabel>
+#include <QGridLayout>
+#include <QDebug>
+#include <QPainter>
+#include <QtMath>
+#include <QMenuBar>
+#include <QMenu>
+#include <QWidgetAction>
+#include <QSlider>
 #include <QScrollBar>
-#include<QFontMetrics>
-#include<QFileDialog>
-#include<QImageReader>
-#include<QImageWriter>
-#include<QRegularExpression>
-#include"dipelidelabel.h"
-#include"diphistowidget.h"
-#include"dipalphascrollarea.h"
+#include <QFontMetrics>
+#include <QFileDialog>
+#include <QImageReader>
+#include <QImageWriter>
+#include <QRegularExpression>
+#include "dipelidelabel.h"
+#include "diphistowidget.h"
+#include "dipalphascrollarea.h"
+#include "dipimagelabel.h"
 
 class DIPHistoWidget;
 
@@ -29,9 +30,12 @@ class DIPImageView : public QWidget {
     Q_OBJECT
 private:
     bool grayMode;
+    QString *titleName;
+    QString *titleInfo;
+    QString *titleOption;
     QImage *image;
     QImage *imageOriginal;
-    QLabel *label;
+    DIPImageLabel *label;
     //QLabel *prompt;
     DIPElideLabel *title;
     QString *filePath;
@@ -45,14 +49,8 @@ private:
     QMenuBar *menuBar;
 
     void init(QWidget *parent = 0);
-
-public slots:
-    void setTitleText(QString &text);
-    bool saveImage(const QString &path, const char *ext = "PNG");
-    const QString saveImageWithDialog();
-    bool loadImage(const QString &path);
-    const QString loadImageWithDialog();
-    void setGrayMode(bool on);
+protected:
+    void paintEvent(QPaintEvent *event);
 public:
     enum {
         CHANNEL_R = 0x0001,
@@ -66,7 +64,12 @@ public:
         ABSOLUTE,
         RELATIVE
     };
-
+    enum TITLE{
+        NAME,
+        INFO,
+        OPT,
+        ALL
+    };
     static int ct(int channel);
     DIPImageView(QWidget *parent = 0);
     bool isImageLoaded();
@@ -75,15 +78,24 @@ public:
     int *getHistoData(int channel = DIPImageView::CHANNEL_S, bool recalculate = true);
     QMenuBar *getMenuBar();
     QImage *getImage();
-    QImage *setImage(QImage *result);
     QImage *convertToGray(QImage *source);
     QScrollBar *verticalScrollBar();
     QScrollBar *horizontalScrollBar();
-
+public slots:
+    void setTitle(QString &text, TITLE component = TITLE::ALL);
+    bool saveImage(const QString &path, const char *ext = "PNG");
+    const QString saveImageWithDialog();
+    bool loadImage(const QString &path);
+    const QString loadImageWithDialog();
+    void setGrayMode(bool on);
+    QImage *setImage(QImage *result, QString *info = 0);
+    QImage *receiveImage();
+    QImage *clearImage();
 signals:
     void _imageLoaded(const QString);
     void _imageSaved(const QString);
-    void _imageSetted();
+    void _imageIsSet();
+    void _imageNotSet();
 
 };
 

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QLabel>
+#include <QDebug>
 
 class DIPToolDialog : public QWidget
 {
@@ -21,6 +22,7 @@ signals:
 public slots:
     void setTitle(const QString *title);
     void loadUI(QWidget *ui);
+    void adjustDialogSize();
 };
 
 #endif // DIPTOOLDIALOG_H

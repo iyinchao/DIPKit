@@ -21,7 +21,10 @@ SOURCES += main.cpp \
     diptooldialog.cpp \
     module/dipmodulebase.cpp \
     module/dipmoduleht.cpp \
-    module/dipmoduleag.cpp
+    module/dipmoduleag.cpp \
+    module/dipmodulecv.cpp \
+    dipimagelabel.cpp \
+    module/dipmodulemm.cpp
 
 HEADERS  += \
     dipkit.h \
@@ -32,14 +35,20 @@ HEADERS  += \
     diptooldialog.h \
     module/dipmodulebase.h \
     module/dipmoduleht.h \
-    module/dipmoduleag.h
+    module/dipmoduleag.h \
+    module/dipmodulecv.h \
+    dipimagelabel.h \
+    module/dipmodulemm.h
 
 FORMS    += dipkit.ui
 
 OTHER_FILES += \
     artwork/alpha_bg.ai \
     snippet.txt \
-    todo.txt
+    todo.txt \
+    blog.txt
 
 RESOURCES += \
     dipkit.qrc
+
+RC_ICONS = resource/icon.ico

@@ -29,6 +29,7 @@ signals:
     void _resultImage(QImage *result, DIPImageView *dest);
     void _console(const QString &);
     void _loadUI(QWidget *);
+    void _adjustDialogSize();
 };
 
 #endif // DIPMODULEBASE_H

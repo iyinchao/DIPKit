@@ -1,9 +1,7 @@
 Mouse color pick
 QSettings intergration
 
-save function
-hide tool dialog
-sync source & result
+median filter perofrmance issue
 more console info
 viewertitle text
 swap image in alg
