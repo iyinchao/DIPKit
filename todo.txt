@@ -1,8 +1,8 @@
 Mouse color pick
 QSettings intergration
 
+sync color pick label
 median filter perofrmance issue
 more console info
 viewertitle text
-swap image in alg
 scale image, size too big?

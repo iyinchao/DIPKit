@@ -642,10 +642,11 @@ void DIPModuleCV::switchFilter(bool on)
                 table->setModel(custK);
                 for (int y = 0; y < _cz(sizeSd->value()); ++y) {
                     for (int x = 0; x < _cz(sizeSd->value()); ++x) {
-                        custK->setItem(y, x, new QStandardItem("1"));
+                        custK->setItem(y, x, new QStandardItem(""));
                         table->setColumnWidth(x,table->rowHeight(y));
                     }
                 }
+                connect(custK, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(tableMultiEdit(QStandardItem*)));
             }
         }
 
@@ -686,8 +687,17 @@ void DIPModuleCV::updateCustTable(int value)
     table->setModel(custK);
     for (int y = 0; y < _cz(sizeSd->value()); ++y) {
         for (int x = 0; x < _cz(sizeSd->value()); ++x) {
-            custK->setItem(y, x, new QStandardItem("1"));
+            custK->setItem(y, x, new QStandardItem(""));
             table->setColumnWidth(x,table->rowHeight(y));
         }
+    }
+    connect(custK, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(tableMultiEdit(QStandardItem*)));
+}
+
+void DIPModuleCV::tableMultiEdit(QStandardItem *item)
+{
+    QModelIndexList selectedIndex = table->selectionModel()->selectedIndexes();
+    foreach(QModelIndex i, selectedIndex){
+        custK->item(i.row(), i.column())->setData(item->data(Qt::DisplayRole), Qt::EditRole);
     }
 }

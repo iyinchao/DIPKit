@@ -8,5 +8,6 @@
         <file>resource/icon/view-sync.png</file>
         <file>resource/icon/tool-dialog.png</file>
         <file>resource/icon/forward-left.png</file>
+        <file>resource/icon/color-picker.png</file>
     </qresource>
 </RCC>

@@ -29,7 +29,6 @@ public:
 
 private:
     //Ui::DIPKit *ui;
-    bool isViewSync;
     QWidget *mainWidget;
     QGridLayout *mainLayout;
     QSplitter *mainSplitter;
@@ -45,6 +44,7 @@ private:
     QMenu *resFileMenu;
 
     QAction *viewSyncAct;
+    QAction *colorSyncAct;
     QAction *toggleToolAct;
     QAction *projectHTAct;
     QAction *projectAGAct;
@@ -70,10 +70,8 @@ private:
 
     DIPToolDialog *toolDialog;
 
-
     void initUI();
     void initMenu();
-
 
 public slots:
     void loadModule();
@@ -83,6 +81,8 @@ public slots:
     void applyResultImage(QImage *result, DIPImageView *dest);
     void displayHistogram();
     void viewSRScrollSync(int value);
+    void viewSRColorTagShowSync(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y);
+    void viewSRColorTagHideSync();
     void toggleViewSync(bool on);
     void toggleTool(bool show);
 

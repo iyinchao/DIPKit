@@ -20,9 +20,6 @@ protected:
     void initUI();
 
 private:
-    const int *K_SOBEL = new int[1,2,3];
-    const int *K_PREWITT;
-    const int *K_ROBERTS;
     QGridLayout *mainLt;
     QGroupBox *edgeGB;
     QGridLayout *edgeGBL;
@@ -54,6 +51,7 @@ public slots:
     void switchFilter(bool on);
     void calSdLb(int value = -1);
     void updateCustTable(int value);
+    void tableMultiEdit(QStandardItem* item);
 };
 
 #endif // DIPMODULECV_H

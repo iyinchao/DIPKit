@@ -19,6 +19,7 @@
 #include <QImageReader>
 #include <QImageWriter>
 #include <QRegularExpression>
+#include "dipcolortag.h"
 #include "dipelidelabel.h"
 #include "diphistowidget.h"
 #include "dipalphascrollarea.h"
@@ -41,6 +42,7 @@ private:
     QString *filePath;
     QGridLayout *layout;
     DIPAlphaScrollArea *scrollArea;
+    DIPColorTag *colorTag;
 
     int **histoData;
     DIPHistoWidget *histo;
@@ -81,6 +83,10 @@ public:
     QImage *convertToGray(QImage *source);
     QScrollBar *verticalScrollBar();
     QScrollBar *horizontalScrollBar();
+    DIPAlphaScrollArea *alphaScrollArea();
+    DIPImageLabel *imageLabel();
+    bool isColorTagPassive();
+    void setColorTagPassive(bool value);
 public slots:
     void setTitle(QString &text, TITLE component = TITLE::ALL);
     bool saveImage(const QString &path, const char *ext = "PNG");
@@ -91,11 +97,18 @@ public slots:
     QImage *setImage(QImage *result, QString *info = 0);
     QImage *receiveImage();
     QImage *clearImage();
+    void __emitCTShow(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y);
+    void __emitCTHide();
+    void colorTagShow(QColor*, int mouse_x, int mouse_y, int pic_x, int pic_y, DIPImageView *ref = 0);
+    void colorTagHide();
+    void __colorTag(QColor* color, int mouse_x, int mouse_y, int pic_x, int pic_y);
 signals:
     void _imageLoaded(const QString);
     void _imageSaved(const QString);
     void _imageIsSet();
     void _imageNotSet();
+    void _colorTagShow(QColor*,int,int,int,int);
+    void _colorTagHide();
 
 };
 

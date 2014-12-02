@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     module/dipmoduleag.cpp \
     module/dipmodulecv.cpp \
     dipimagelabel.cpp \
-    module/dipmodulemm.cpp
+    module/dipmodulemm.cpp \
+    dipcolortag.cpp
 
 HEADERS  += \
     dipkit.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     module/dipmoduleag.h \
     module/dipmodulecv.h \
     dipimagelabel.h \
-    module/dipmodulemm.h
+    module/dipmodulemm.h \
+    dipcolortag.h
 
 FORMS    += dipkit.ui
 

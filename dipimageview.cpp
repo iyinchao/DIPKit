@@ -69,12 +69,21 @@ void DIPImageView::init(QWidget *parent)
     scrollArea->setWidget(label);
     connect(label, SIGNAL(__adjustSize(int,int)), scrollArea, SLOT(contentResize(int,int)));
 
+    colorTag = new DIPColorTag(scrollArea);
+    colorTag->setAttribute(Qt::WA_TransparentForMouseEvents);
+    //connect(label, SIGNAL(__showColorTag(QColor*,int,int,int,int)), colorTag, SLOT(showContent(QColor*,int,int,int,int)));
+    connect(label, SIGNAL(__showColorTag(QColor*,int,int,int,int)), this, SLOT(__colorTag(QColor*,int,int,int,int)));
+    connect(label, SIGNAL(__hideColorTag()), colorTag, SLOT(hideContent()));
+    connect(label, SIGNAL(__showColorTag(QColor*,int,int,int,int)), this, SLOT(__emitCTShow(QColor*,int,int,int,int)));
+    connect(label, SIGNAL(__hideColorTag()), this, SLOT(__emitCTHide()));
+
     layout = new QGridLayout(this);
 
     layout->addWidget(title,0,0);
     layout->addWidget(scrollArea,1,0);
-    //layout->addWidget(prompt,1,0);
     layout->addWidget(histo,1,0);
+    layout->addWidget(colorTag,1,0);
+    //layout->addWidget(prompt,1,0);
     layout->addWidget(menuBar,2,0);
     layout->setContentsMargins(0,0,0,0); //important!
     layout->setSpacing(0);
@@ -226,9 +235,11 @@ bool DIPImageView::loadImage(const QString &path)
     if(filePath != NULL)delete filePath;
     filePath = new QString(path);
     if(grayMode){
-        label->setPixmap(QPixmap::fromImage(*(convertToGray(image))));
+//        label->setPixmap(QPixmap::fromImage(*(convertToGray(image))));
+        label->setImage(convertToGray(image));
     }else{
-        label->setPixmap(QPixmap::fromImage(*image));
+        //label->setPixmap(QPixmap::fromImage(*image));
+        label->setImage(image);
     }
     label->adjustSize();
 
@@ -430,9 +441,11 @@ QImage *DIPImageView::setImage(QImage *result, QString *info)
 
     image = result;
     if(grayMode){
-        label->setPixmap(QPixmap::fromImage(*(convertToGray(image))));
+        //label->setPixmap(QPixmap::fromImage(*(convertToGray(image))));
+        label->setImage(convertToGray(image));
     }else{
-        label->setPixmap(QPixmap::fromImage(*image));
+        //label->setPixmap(QPixmap::fromImage(*image));
+        label->setImage(image);
     }
     label->adjustSize();
 
@@ -488,6 +501,53 @@ QImage *DIPImageView::clearImage()
     }
 }
 
+void DIPImageView::__emitCTShow(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y)
+{
+    emit _colorTagShow(color, mouse_x, mouse_y, pic_x, pic_y);
+}
+
+void DIPImageView::__emitCTHide()
+{
+    emit _colorTagHide();
+}
+
+void DIPImageView::colorTagShow(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y, DIPImageView *ref)
+{
+    QColor *passiveColor;
+    int diffMX, diffMY, diffPX, diffPY;
+    if(colorTag->isPassive()){
+        if(!ref) ref = this;
+        diffMX = ref->horizontalScrollBar()->value(); //- this->horizontalScrollBar()->value();
+        diffMY = ref->verticalScrollBar()->value(); //- this->verticalScrollBar()->value();
+        diffPX = (ref->alphaScrollArea()->geometry().left() - ref->imageLabel()->geometry().left()) -
+                    (this->scrollArea->geometry().left() - this->label->geometry().left()) + ref->horizontalScrollBar()->value() - this->horizontalScrollBar()->value();
+        diffPY = (ref->alphaScrollArea()->geometry().top() - ref->imageLabel()->geometry().top()) -
+                    (this->scrollArea->geometry().top() - this->label->geometry().top()) + ref->verticalScrollBar()->value() - this->verticalScrollBar()->value();
+        pic_x -= diffPX;
+        pic_y -= diffPY;
+        mouse_x -= diffMX;
+        mouse_y -= diffMY;
+        QRgb pixel = label->getPixel(pic_x, pic_y);
+        passiveColor = new QColor(qRed(pixel), qGreen(pixel), qBlue(pixel), qAlpha(pixel));
+        if(!passiveColor){
+            passiveColor = new QColor(0,0,0,0);
+        }
+    }
+
+    colorTag->showContent(passiveColor, mouse_x, mouse_y, pic_x, pic_y);
+}
+
+void DIPImageView::colorTagHide()
+{
+    colorTag->hideContent();
+}
+
+void DIPImageView::__colorTag(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y)
+{
+
+    colorTag->showContent(color, mouse_x - horizontalScrollBar()->value(), mouse_y - verticalScrollBar()->value(), pic_x, pic_y);
+}
+
 QImage *DIPImageView::convertToGray(QImage *source)
 {
     int w = source->width(); //image dimensions
@@ -513,5 +573,25 @@ QScrollBar *DIPImageView::verticalScrollBar()
 QScrollBar *DIPImageView::horizontalScrollBar()
 {
     return scrollArea->horizontalScrollBar();
+}
+
+DIPAlphaScrollArea *DIPImageView::alphaScrollArea()
+{
+    return scrollArea;
+}
+
+DIPImageLabel *DIPImageView::imageLabel()
+{
+    return label;
+}
+
+bool DIPImageView::isColorTagPassive()
+{
+    return colorTag->isPassive();
+}
+
+void DIPImageView::setColorTagPassive(bool value)
+{
+    colorTag->setPassive(value);
 }
 

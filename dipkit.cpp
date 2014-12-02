@@ -7,7 +7,7 @@ DIPKit::DIPKit(QWidget *parent) :
     QMainWindow(parent)
 {
     module = NULL;
-    isViewSync = true;
+    //isViewSync = true;
     initUI();
     initMenu();
     //setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -72,7 +72,10 @@ void DIPKit::initUI()
     connect(sourceView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
     connect(resultView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
     connect(resultView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(viewSRScrollSync(int)));
-
+    connect(sourceView, SIGNAL(_colorTagShow(QColor*,int,int,int,int)), this, SLOT(viewSRColorTagShowSync(QColor*,int,int,int,int)));
+    connect(resultView, SIGNAL(_colorTagShow(QColor*,int,int,int,int)), this, SLOT(viewSRColorTagShowSync(QColor*,int,int,int,int)));
+    connect(sourceView, SIGNAL(_colorTagHide()), this, SLOT(viewSRColorTagHideSync()));
+    connect(resultView, SIGNAL(_colorTagHide()), this, SLOT(viewSRColorTagHideSync()));
     //mainLayout->addWidget();
 
 // mainLayout->addWidget(sourceView,0,0,1,1);
@@ -101,6 +104,7 @@ void DIPKit::initMenu()
     mainFileMenu = new QMenu(tr("&File"), this);
     mainProjectMenu = new QMenu(tr("&Projects"), this);
     viewSyncAct = new QAction(QIcon(":/resource/icon/view-sync.png"), tr("&Sync viewer scroll"), this);
+    colorSyncAct = new QAction(QIcon(":/resource/icon/color-picker.png"), tr("&Sync color picker"), this);
     toggleToolAct = new QAction(QIcon(":/resource/icon/tool-dialog.png"), tr("&Toggle tool dialog"), this);
     projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram && Threshold)"), this);
     projectAGAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 2 (Algebraic && Geometry Operation)"), this);
@@ -109,11 +113,14 @@ void DIPKit::initMenu()
 
     viewSyncAct->setCheckable(true);
     viewSyncAct->setChecked(true);
+    colorSyncAct->setCheckable(true);
+    colorSyncAct->setChecked(true);
     toggleToolAct->setCheckable(true);
     toggleToolAct->setChecked(true);
     //projectHTAct->setIconText();
 
     mainFileMenu->addAction(viewSyncAct);
+    mainFileMenu->addAction(colorSyncAct);
     mainFileMenu->addAction(toggleToolAct);
     mainProjectMenu->addAction(projectHTAct);
     mainProjectMenu->addAction(projectAGAct);
@@ -154,7 +161,6 @@ void DIPKit::initMenu()
     histoBSrcAct->setChecked(false);
     histoASrcAct->setChecked(false);
     histoSSrcAct->setChecked(false);
-
 
     srcFileMenu->addAction(openSrcAct);
     srcFileMenu->addAction(saveSrcAct);
@@ -219,7 +225,6 @@ void DIPKit::initMenu()
 
     resultView->getMenuBar()->setStyleSheet("background-color: rgba(0,0,0,0%)");
     resultView->getMenuBar()->addMenu(resFileMenu);
-
 
    //loadModule();
 }
@@ -321,7 +326,7 @@ void DIPKit::displayHistogram()
 
 void DIPKit::viewSRScrollSync(int value)
 {
-    if(QObject::sender() == NULL || isViewSync == false){
+    if(QObject::sender() == NULL || !viewSyncAct->isChecked()){
         return;
     }else{
         if(QObject::sender() == sourceView->verticalScrollBar()){
@@ -336,14 +341,39 @@ void DIPKit::viewSRScrollSync(int value)
     }
 }
 
+void DIPKit::viewSRColorTagShowSync(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y)
+{
+    if(QObject::sender() == NULL || !colorSyncAct->isChecked()){
+        return;
+    }else{
+        if(QObject::sender() == sourceView){
+            resultView->setColorTagPassive(true);
+            resultView->colorTagShow(color, mouse_x, mouse_y, pic_x, pic_y, sourceView);
+        }else if(QObject::sender() == resultView){
+            sourceView->setColorTagPassive(true);
+            sourceView->colorTagShow(color, mouse_x, mouse_y, pic_x, pic_y, resultView);
+        }
+    }
+}
+
+void DIPKit::viewSRColorTagHideSync()
+{
+    if(QObject::sender() == NULL || !colorSyncAct->isChecked()){
+        return;
+    }else{
+        if(QObject::sender() == sourceView){
+            resultView->colorTagHide();
+        }else if(QObject::sender() == resultView){
+            sourceView->colorTagHide();
+        }
+    }
+}
+
 void DIPKit::toggleViewSync(bool on)
 {
     if(on){
-        isViewSync = true;
         resultView->verticalScrollBar()->setValue(sourceView->verticalScrollBar()->value());
         resultView->horizontalScrollBar()->setValue(sourceView->horizontalScrollBar()->value());
-    }else{
-        isViewSync = false;
     }
 }
 
