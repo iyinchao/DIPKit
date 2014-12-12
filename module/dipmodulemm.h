@@ -22,15 +22,17 @@ private:
     QGridLayout *mainLt;
     QGroupBox *seGB;
     QGridLayout *seGBL;
+    QGroupBox *opGB;
+    QGridLayout *opGBL;
     QTableView *table;
     QSlider *sizeSd;
     QLabel *sizeLb;
     QRadioButton *binaRB;
     QRadioButton *grayRB;
-    QPushButton *OpeBt;
-    QPushButton *CloBt;
-    QPushButton *DilBt;
-    QPushButton *EroBt;
+    QPushButton *opeBt;
+    QPushButton *cloBt;
+    QPushButton *dilBt;
+    QPushButton *eroBt;
 
     int _cz(int value);
 
@@ -38,6 +40,9 @@ public slots:
     void calSdLb(int value = -1);
     void updateEditor(int value);
     void seMultiEdit(QStandardItem *item);
+    void setSEOrigin(QModelIndex index);
+    void __doDilation();
+    void __doOpen();
 };
 
 #endif // DIPMODULEMM_H

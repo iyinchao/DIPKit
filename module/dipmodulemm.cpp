@@ -15,21 +15,33 @@ void DIPModuleMM::initUI()
     table = new QTableView(seGB);
     sizeSd = new QSlider(Qt::Horizontal, seGB);
     sizeLb = new QLabel(tr("Editor Size:"), seGB);
+    opGB = new QGroupBox(tr("Operations"), parent);
+    opGBL = new QGridLayout(opGB);
+    binaRB = new QRadioButton(tr("Binary"), opGB);
+    grayRB = new QRadioButton(tr("Gray Scale"), opGB);
+    opeBt = new QPushButton(tr("Open"), opGB);
+    cloBt = new QPushButton(tr("Close"), opGB);
+    dilBt = new QPushButton(tr("Dilation"), opGB);
+    eroBt = new QPushButton(tr("Erosion"), opGB);
 
     seGBL->addWidget(sizeLb, 1,0,1,1);
     seGBL->addWidget(sizeSd, 2,0,1,1);
     seGBL->addWidget(table, 3,0,1,1);
-    sizeSd->setMaximum(5);
+    sizeSd->setMaximum(9);
     sizeSd->setMinimum(1);
     sizeSd->setValue(1);
     sizeSd->setPageStep(1);
     sizeSd->setTickPosition(QSlider::TicksBelow);
+    opGBL->addWidget(binaRB, 0,0,1,1);
+    opGBL->addWidget(grayRB, 0,1,1,1);
+    opGBL->addWidget(dilBt, 1,0,1,1);
+    opGBL->addWidget(eroBt, 1,1,1,1);
+    opGBL->addWidget(opeBt, 2,0,1,1);
+    opGBL->addWidget(cloBt, 2,1,1,1);
 
     mainLt = new QGridLayout(DIPModuleBase::getUI());
     mainLt->addWidget(seGB,0,0,1,1);
-
-    connect(sizeSd, SIGNAL(valueChanged(int)), this, SLOT(calSdLb(int)));
-    connect(sizeSd, SIGNAL(valueChanged(int)), this, SLOT(updateEditor(int)));
+    mainLt->addWidget(opGB,1,0,1,1);
 
     DIPModuleBase::getUI()->setLayout(mainLt);
 
@@ -42,7 +54,13 @@ void DIPModuleMM::initUI()
             table->setColumnWidth(x,table->rowHeight(y));
         }
     }
+
     connect(se, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(seMultiEdit(QStandardItem*)));
+    connect(table, SIGNAL(doubleClicked(QModelIndex)), this ,SLOT(setSEOrigin(QModelIndex)));
+    connect(sizeSd, SIGNAL(valueChanged(int)), this, SLOT(calSdLb(int)));
+    connect(sizeSd, SIGNAL(valueChanged(int)), this, SLOT(updateEditor(int)));
+    connect(dilBt, SIGNAL(clicked()), this, SLOT(__doDilation()));
+    connect(opeBt, SIGNAL(clicked()), this, SLOT(__doOpen()));
 
 }
 
@@ -84,6 +102,29 @@ void DIPModuleMM::seMultiEdit(QStandardItem *item)
         se->item(i.row(), i.column())->setData(item->data(Qt::DisplayRole), Qt::EditRole);
     }
     //qDebug()<<(item->data(Qt::DisplayRole)).toDouble();
+}
+
+void DIPModuleMM::setSEOrigin(QModelIndex index)
+{
+    //table->
+
+}
+
+void DIPModuleMM::__doDilation()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Source image is not loaded"));
+        return;
+    }
+}
+
+void DIPModuleMM::__doOpen()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Source image is not loaded"));
+        return;
+    }
+
 }
 
 int DIPModuleMM::_cz(int value)

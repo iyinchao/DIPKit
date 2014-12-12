@@ -1,7 +1,7 @@
 Mouse color pick
 QSettings intergration
 
-sync color pick label
+HEX value in colorpicker
 median filter perofrmance issue
 more console info
 viewertitle text
