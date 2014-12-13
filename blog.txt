@@ -7,3 +7,10 @@
 
 //使用convertToFormat来改变QImage格式
 converted = source->convertToFormat( QImage::Format_RGB888 ) //此句不改变source
+
+//获得一个类型的最小值，如double
+std::numeric_limits<double>::max()
+//但是，min是指可以取得的绝对值最小的正值
+std::numeric_limits<double>::min()  //+1e-308
+
+

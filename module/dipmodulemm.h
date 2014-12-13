@@ -5,8 +5,10 @@
 #include <QGroupBox>
 #include <QSlider>
 #include <QRadioButton>
-#include <QTableView>
+#include <QTableWidget>
 #include <QStandardItemModel>
+#include <QColor>
+#include <limits>
 #include "dipmodulebase.h"
 
 class DIPModuleMM : public DIPModuleBase
@@ -18,30 +20,35 @@ protected:
     void initUI();
 
 private:
-    QStandardItemModel *se;
     QGridLayout *mainLt;
     QGroupBox *seGB;
     QGridLayout *seGBL;
     QGroupBox *opGB;
     QGridLayout *opGBL;
-    QTableView *table;
+    QTableWidget *table;
     QSlider *sizeSd;
     QLabel *sizeLb;
-    QRadioButton *binaRB;
-    QRadioButton *grayRB;
     QPushButton *opeBt;
     QPushButton *cloBt;
     QPushButton *dilBt;
     QPushButton *eroBt;
+    QIcon origIcon;
+    int origX;
+    int origY;
 
     int _cz(int value);
+
+    enum OP{
+        DIL = 0,
+        ERO = 1
+    };
 
 public slots:
     void calSdLb(int value = -1);
     void updateEditor(int value);
-    void seMultiEdit(QStandardItem *item);
+    void seMultiEdit(int, int);
     void setSEOrigin(QModelIndex index);
-    void __doDilation();
+    void __doDilEro(int op = 0);
     void __doOpen();
 };
 
