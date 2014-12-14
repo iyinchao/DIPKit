@@ -21,6 +21,7 @@ void DIPModuleMM::initUI()
     cloBt = new QPushButton(tr("Close"), opGB);
     dilBt = new QPushButton(tr("Dilation"), opGB);
     eroBt = new QPushButton(tr("Erosion"), opGB);
+    recBt = new QPushButton(tr("Binary Reconstruction"), opGB);
     origIcon = QIcon(QIcon(":/resource/icon/origin.png"));
     origX = 0;
     origY = 0;
@@ -37,6 +38,8 @@ void DIPModuleMM::initUI()
     opGBL->addWidget(eroBt, 1,1,1,1);
     opGBL->addWidget(opeBt, 2,0,1,1);
     opGBL->addWidget(cloBt, 2,1,1,1);
+    opGBL->addWidget(recBt, 3,0,1,2);
+    table->setMinimumSize(200, 200);
 
     mainLt = new QGridLayout(DIPModuleBase::getUI());
     mainLt->addWidget(seGB,0,0,1,1);
@@ -63,6 +66,8 @@ void DIPModuleMM::initUI()
     connect(dilBt, SIGNAL(clicked()), this, SLOT(__doDilEro()));
     connect(eroBt, SIGNAL(clicked()), this, SLOT(__doDilEro()));
     connect(opeBt, SIGNAL(clicked()), this, SLOT(__doOpen()));
+    connect(cloBt, SIGNAL(clicked()), this, SLOT(__doClose()));
+    connect(recBt, SIGNAL(clicked()), this, SLOT(__doReconstruction()));
     sizeSd->setValue(2);
     sizeSd->setValue(1);
 }
@@ -151,13 +156,14 @@ void DIPModuleMM::setSEOrigin(QModelIndex index)
     origY = index.row();
 }
 
-void DIPModuleMM::__doDilEro(int op)
+void DIPModuleMM::__doDilEro()
 {
     if(!sourceView->isImageLoaded()){
         emit _console(tr("ERROR: Source image is not loaded"));
         return;
     }
 
+    OP op = OP::DIL;
     if(sender()){
         if(sender() == dilBt){
             op = OP::DIL;
@@ -166,6 +172,197 @@ void DIPModuleMM::__doDilEro(int op)
         }
     }
 
+    emit _resultImage(dilEro(sourceView->getImage(), op), resultView);
+    emit _console(QString("%1 operation is done.").arg(op == OP::DIL?"Dilation":"Erosion"));
+}
+
+void DIPModuleMM::__doOpen()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Source image is not loaded"));
+        return;
+    }
+
+    emit _resultImage(dilEro(dilEro(sourceView->getImage(), OP::ERO), OP::DIL), resultView);
+    emit _console(QString("Open operation is done."));
+}
+
+void DIPModuleMM::__doClose(){
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Source image is not loaded"));
+        return;
+    }
+
+    emit _resultImage(dilEro(dilEro(sourceView->getImage(), OP::DIL), OP::ERO), resultView);
+    emit _console(QString("Close operation is done."));
+}
+
+
+//see http://stackoverflow.com/questions/17317047/binary-reconstruction-algorithm
+//img = imread ('Input.jpg');
+//img = im2bw(img, 0.8);
+//J = bwmorph(img,'open');
+//THRESH = 0;
+//while (1)
+//    T = J;
+//    J = bwmorph(J, 'dilate');
+//    J = img & J;
+//    if (sum(T(:) - J(:)) <= THRESH)
+//        break;
+//    end
+//end
+void DIPModuleMM::__doReconstruction()
+{
+    if(!sourceView->isImageLoaded()){
+        emit _console(tr("ERROR: Source image is not loaded"));
+        return;
+    }
+
+    //OTSU method to get binary image
+   /* QImage *source = sourceView->getImage();
+    int w = source->width(); //image dimensions
+    int h = source->height();
+    int *his = sourceView->getHistoData(DIPImageView::CHANNEL_S, true);
+    double max = 0;
+    int threshold = 0;
+
+    for(int i = 0; i < 255; i++){
+        double N0 = 0;
+        double U0 = 0;
+        double N1 = 0;
+        double U1 = 0;
+        for(int j = 0; j <= i; j++){
+            N0 += his[j];
+            U0 += his[j] * j;
+        }
+        N0 /= double(w*h);
+        if(N0) U0 /= double(N0);
+        for(int j = i+1; j <= 255; j++){
+            N1 += his[j];
+            U1 += his[j] * j;
+        }
+        N1 /= double(w*h);
+        if(N1) U1 /= double(N1);
+        double d = N0 * N1 * (U0 - U1) * (U0 - U1);
+        if(d > max){
+            max = d;
+            threshold = i;
+        }
+    }
+
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0;i < h; i++){
+        QRgb* row = (QRgb*)source->scanLine(i);
+        QRgb* rowResult = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+            int v = qGray(qRed(row[j]),qGreen(row[j]), qBlue(row[j]));
+            rowResult[j] = v >= threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255);
+            //result->setPixel(j, i, v > threshold ? qRgba(255,255,255,255):qRgba(0,0,0,255));
+        }
+    }
+
+    sourceView->setImage(result);*/
+
+    //do reconstruction
+    QImage *source = sourceView->getImage();
+    QImage *J= dilEro(dilEro(sourceView->getImage(), OP::ERO), OP::DIL);
+    QImage *T = NULL;
+    int THRES = 0;
+    do{
+        if(T) delete T;
+        T = _copyQImage(J);
+            QImage *temp = J;
+        J = dilEro(J, OP::DIL);
+            delete temp;
+            temp = J;
+        J = _binaryUnion(source, J);
+            delete temp;
+
+    }while(_diffPixels(J, T) > THRES);
+
+    emit _resultImage(T, resultView);
+    emit _console(QString("Binary reconstruction is done."));
+}
+
+int DIPModuleMM::_cz(int value)
+{
+    return value * 2 + 1;
+}
+
+int DIPModuleMM::_diffPixels(QImage *ia, QImage *ib)
+{
+    qDebug()<<ia;
+    qDebug()<<ib;
+//    !ia || !ib || !ia->isNull() || !ib->isNull() ||
+    if(ia->width() != ib->width() || ia->height() != ib->height()){
+        return -1;
+    }
+
+    int n = 0;
+    int h = ia->height();
+    int w = ia->width();
+    for(int i = 0; i < h; i++){
+        QRgb *ra = (QRgb*)ia->scanLine(i);
+        QRgb *rb = (QRgb*)ib->scanLine(i);
+        for(int j = 0; j < w; j++){
+            if(qGray(ra[j]) != qGray(rb[j])){
+                n++;
+            }
+        }
+    }
+    qDebug()<<n;
+    return n;
+}
+
+QImage *DIPModuleMM::_binaryUnion(QImage *ia, QImage *ib)
+{
+    if(!ia || !ib || ia->isNull() || ib->isNull() ||ia->width() != ib->width() || ia->height() != ib->height()){
+        return NULL;
+    }
+
+    int h = ia->height();
+    int w = ia->width();
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0; i < h; i++){
+        QRgb *ra = (QRgb*)ia->scanLine(i);
+        QRgb *rb = (QRgb*)ib->scanLine(i);
+        QRgb* rowResult = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+//            if(qGray(ra[j]) != qGray(rb[j])){
+//                n++;
+//            }
+            if(qGray(ra[j]) && qGray(rb[j])){
+                rowResult[j] = qRgb(255,255,255);
+            }else{
+                rowResult[j] = qRgb(0,0,0);
+            }
+        }
+    }
+
+    return result;
+}
+
+QImage *DIPModuleMM::_copyQImage(QImage *source)
+{
+    if(!source || source->isNull()){
+        return NULL;
+    }
+
+    int w = source->width(); //image dimensions
+    int h = source->height();
+    QImage *result = new QImage(w,h,QImage::Format_ARGB32);
+    for(int i = 0; i < h; i++){
+        QRgb* rS = (QRgb*)source->scanLine(i);
+        QRgb* rR = (QRgb*)result->scanLine(i);
+        for(int j = 0; j < w; j++){
+            rR[j] = rS[j];
+        }
+    }
+    return result;
+}
+
+QImage *DIPModuleMM::dilEro(QImage *source, OP op)
+{
     int seSize = _cz(sizeSd->value());
     double seSum = 0;
     double seMax = -10000;
@@ -186,8 +383,7 @@ void DIPModuleMM::__doDilEro(int op)
         if(seMax < seVal[k]) seMax = seVal[k];
         if(seMin > seVal[k]) seMin = seVal[k];
     }
-    //qDebug()<<seMax<<seMin;
-    QImage *source = sourceView->getImage();
+
     int w = source->width();
     int h = source->height();
     QImage *result = new QImage(w,h,QImage::Format_ARGB32);
@@ -230,18 +426,8 @@ void DIPModuleMM::__doDilEro(int op)
                         //qDebug()<<"in!"<<(top < (double)(qGray(area[k]) * seVal[k]))<<top<<qGray(area[k]) * seVal[k];
                     }
                     if(top < qGray(area[k]) * seVal[k]){
-//                        if(i == 0 && j== 4){
-//                            qDebug()<<"in!"<<(top < qGray(area[k]) * seVal[k])<<top<<qGray(area[k]) * seVal[k];
-//                        }
-
                         top = qGray(area[k]) * seVal[k];
                         topPixel = area[k];
-//                        if(i == 3 && j== 0){
-//                            qDebug()<<"in!"<<top;
-
-//                        }
-                        //qDebug()<<"in!"<<i<<j;
-                        //qDebug()<<qGray(area[k]);
                     }
                 }else{
 //                    if(i == 0 && j== 0){
@@ -257,20 +443,7 @@ void DIPModuleMM::__doDilEro(int op)
         }
     }
 
-    //qDebug()<<qRed(((QRgb*)result->scanLine(3))[3]);
-
-    emit _resultImage(result, resultView);
+    return result;
 }
 
-void DIPModuleMM::__doOpen()
-{
-    if(!sourceView->isImageLoaded()){
-        emit _console(tr("ERROR: Source image is not loaded"));
-        return;
-    }
-}
 
-int DIPModuleMM::_cz(int value)
-{
-    return value * 2 + 1;
-}

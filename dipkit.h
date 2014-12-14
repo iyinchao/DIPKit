@@ -46,6 +46,7 @@ private:
     QAction *viewSyncAct;
     QAction *colorSyncAct;
     QAction *toggleToolAct;
+    QAction *clearConsoleAct;
     QAction *projectHTAct;
     QAction *projectAGAct;
     QAction *projectCVAct;

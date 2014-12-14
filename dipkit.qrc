@@ -10,5 +10,6 @@
         <file>resource/icon/forward-left.png</file>
         <file>resource/icon/color-picker.png</file>
         <file>resource/icon/origin.png</file>
+        <file>resource/icon/clear-console.png</file>
     </qresource>
 </RCC>

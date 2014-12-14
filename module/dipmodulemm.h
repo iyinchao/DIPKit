@@ -32,24 +32,33 @@ private:
     QPushButton *cloBt;
     QPushButton *dilBt;
     QPushButton *eroBt;
+    QPushButton *recBt;
     QIcon origIcon;
     int origX;
     int origY;
 
     int _cz(int value);
 
+    int _diffPixels(QImage *ia, QImage *ib);
+    QImage *_binaryUnion(QImage *ia, QImage *ib);
+    QImage *_copyQImage(QImage *source);
+
     enum OP{
         DIL = 0,
         ERO = 1
     };
+
+    QImage *dilEro(QImage *source, DIPModuleMM::OP op = OP::DIL);
 
 public slots:
     void calSdLb(int value = -1);
     void updateEditor(int value);
     void seMultiEdit(int, int);
     void setSEOrigin(QModelIndex index);
-    void __doDilEro(int op = 0);
+    void __doDilEro();
     void __doOpen();
+    void __doClose();
+    void __doReconstruction();
 };
 
 #endif // DIPMODULEMM_H

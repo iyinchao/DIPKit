@@ -106,6 +106,7 @@ void DIPKit::initMenu()
     viewSyncAct = new QAction(QIcon(":/resource/icon/view-sync.png"), tr("&Sync viewer scroll"), this);
     colorSyncAct = new QAction(QIcon(":/resource/icon/color-picker.png"), tr("&Sync color picker"), this);
     toggleToolAct = new QAction(QIcon(":/resource/icon/tool-dialog.png"), tr("&Toggle tool dialog"), this);
+    clearConsoleAct = new QAction(QIcon(":/resource/icon/clear-console.png"), tr("&Clear console"), this);
     projectHTAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 1 (Histogram && Threshold)"), this);
     projectAGAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 2 (Algebraic && Geometry Operation)"), this);
     projectCVAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 3 (Convolution && Filters)"), this);
@@ -122,6 +123,8 @@ void DIPKit::initMenu()
     mainFileMenu->addAction(viewSyncAct);
     mainFileMenu->addAction(colorSyncAct);
     mainFileMenu->addAction(toggleToolAct);
+    mainFileMenu->addSeparator();
+    mainFileMenu->addAction(clearConsoleAct);
     mainProjectMenu->addAction(projectHTAct);
     mainProjectMenu->addAction(projectAGAct);
     mainProjectMenu->addAction(projectCVAct);
@@ -129,6 +132,7 @@ void DIPKit::initMenu()
 
     connect(viewSyncAct, SIGNAL(triggered(bool)), this, SLOT(toggleViewSync(bool)));
     connect(toggleToolAct, SIGNAL(triggered(bool)), this, SLOT(toggleTool(bool)));
+    connect(clearConsoleAct, SIGNAL(triggered()), this, SLOT(clearConsole()));
     connect(projectHTAct, SIGNAL(triggered()), this, SLOT(loadModule()));
     connect(projectAGAct, SIGNAL(triggered()), this, SLOT(loadModule()));
     connect(projectCVAct, SIGNAL(triggered()), this, SLOT(loadModule()));
