@@ -106,10 +106,13 @@ void DIPModuleMM::updateEditor(int value)
     for(int i = 0; i < table->columnCount(); i++){
         table->setColumnWidth(i, table->rowHeight(0));
         for(int j = 0; j < table->rowCount(); j++){
-            table->setItem(j, i, new QTableWidgetItem(""));
+            if(!table->item(j, i)){
+                table->setItem(j, i, new QTableWidgetItem(""));
+            }
         }
     }
     //table->item(origY, origX)->setIcon(QIcon());
+    table->item(origY, origX)->setIcon(QIcon());
     table->item((table->rowCount() - 1) / 2, (table->columnCount() - 1) / 2)->setIcon(origIcon);
     origX = (table->columnCount() - 1) / 2;
     origY = (table->rowCount() - 1) / 2;
@@ -269,7 +272,7 @@ void DIPModuleMM::__doReconstruction()
     QImage *T = NULL;
     int THRES = 0;
     do{
-        if(T) delete T;
+            if(T) delete T;
         T = _copyQImage(J);
             QImage *temp = J;
         J = dilEro(J, OP::DIL);
@@ -277,7 +280,6 @@ void DIPModuleMM::__doReconstruction()
             temp = J;
         J = _binaryUnion(source, J);
             delete temp;
-
     }while(_diffPixels(J, T) > THRES);
 
     emit _resultImage(T, resultView);
