@@ -111,6 +111,7 @@ void DIPKit::initMenu()
     projectAGAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 2 (Algebraic && Geometry Operation)"), this);
     projectCVAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 3 (Convolution && Filters)"), this);
     projectMMAct = new QAction(QIcon(":/resource/icon/module.png"), tr("Project 4 (Mathematical morphology)"), this);
+    mainAboutAct = new QAction(tr("&About"), this);
 
     viewSyncAct->setCheckable(true);
     viewSyncAct->setChecked(true);
@@ -137,9 +138,11 @@ void DIPKit::initMenu()
     connect(projectAGAct, SIGNAL(triggered()), this, SLOT(loadModule()));
     connect(projectCVAct, SIGNAL(triggered()), this, SLOT(loadModule()));
     connect(projectMMAct, SIGNAL(triggered()), this, SLOT(loadModule()));
+    connect(mainAboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
     menuBar()->addMenu(mainFileMenu);
     menuBar()->addMenu(mainProjectMenu);
+    menuBar()->addAction(mainAboutAct);
 
     //source
     openSrcAct  = new QAction(QIcon(":/resource/icon/blue-open.png"), tr("&Open a image"), sourceView);
@@ -390,12 +393,54 @@ void DIPKit::toggleTool(bool show)
     }
 }
 
-//void DIPKit::loadModule(QWidget *ui)
-//{
-//    //(this, Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-//    // toolDialog
-
-//    //toolDialog->loadUI(sourceView);
-//    testModule = new Test(sourceView, resultView, this);
-//    connect(testModule, SIGNAL(_loadUI(QWidget*),)
-//}
+void DIPKit::about()
+{
+    QString message = QString("");
+    message.append("<h1>DIPKit</h1> \
+                   <h2 style=\"color:#666;margin-top:-10px;margin-bottom:-5px\">A digital image processing toolbox</h2>\
+                   <hr>\
+                   <h3 style=\"margin-top:-10px;margin-bottom:-15px\">What is DIPKit</h3>\
+                   <p \"margin-top:-10px;\">\
+                   DIPKit is a open-source image processing toolbox created by <a href=\"http://iyinchao.cn\">Charles Yin</a>.\
+                   </p>\
+                   <p>\
+                       This app is using pure Qt 5 API, such as QImage, QPixelMap and is signle-threaded. The project is hosted by <a href=\"https://github.com/iyinchao/DIPKit\">Github</a>. </p>\
+            <p>You can folk and modify it under the control of the lisence <a href=\"http://creativecommons.org/licenses/by-nc/4.0/legalcode\">here</a>(CC BY-NC).\
+            </p>\
+                    <h3 style=\"margin-top:-10px;\">Credit</h3>\
+                    <table>\
+                        <tr>\
+                            <td>\
+                                Mrs Sun Yan\
+                            </td>\
+                            <td>\
+                                Teacher of the DIP course.\
+                            </td>\
+                        </tr>\
+                        <tr>\
+                            <td>\
+                                Google&Glgoo.com&nbsp;\
+                            </td>\
+                            <td>\
+                                Fantastic searching tool.\
+                            </td>\
+                        </tr>\
+                        <tr>\
+                            <td>\
+                                Qt Community\
+                            </td>\
+                            <td>\
+                                Great tool for building GUI.\
+                            </td>\
+                        </tr>\
+                        <tr>\
+                            <td>\
+                                Mom and Dad\
+                            </td>\
+                            <td>\
+                                Of course.\
+                            </td>\
+                        </tr>\
+                        </table>");
+    QMessageBox::about(this, tr("About DIPKit"), message);
+}

@@ -14,3 +14,13 @@ DIPWindow::~DIPWindow()
 }
 
 
+
+//void DIPKit::loadModule(QWidget *ui)
+//{
+//    //(this, Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+//    // toolDialog
+
+//    //toolDialog->loadUI(sourceView);
+//    testModule = new Test(sourceView, resultView, this);
+//    connect(testModule, SIGNAL(_loadUI(QWidget*),)
+//}

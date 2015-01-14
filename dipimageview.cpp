@@ -261,7 +261,7 @@ const QString DIPImageView::loadImageWithDialog()
 
     QFileDialog dialog(this,
                        tr("Load image"),
-                       QString("./"));
+                       QString("./sample/"));
     dialog.setMimeTypeFilters(mimeTypeFilters);
     dialog.selectMimeTypeFilter("image/png");
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -511,7 +511,7 @@ void DIPImageView::__emitCTHide()
     emit _colorTagHide();
 }
 
-void DIPImageView::colorTagShow(QColor *color, int mouse_x, int mouse_y, int pic_x, int pic_y, DIPImageView *ref)
+void DIPImageView::colorTagShow(QColor *, int mouse_x, int mouse_y, int pic_x, int pic_y, DIPImageView *ref)
 {
     QColor *passiveColor;
     int diffMX, diffMY, diffPX, diffPY;

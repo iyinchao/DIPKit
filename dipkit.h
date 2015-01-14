@@ -6,6 +6,7 @@
 #include <QSplitter>
 #include <QSizePolicy>
 #include <QScrollBar>
+#include <QMessageBox>
 #include "dipimageview.h"
 #include "diptooldialog.h"
 
@@ -66,6 +67,7 @@ private:
     QAction *histoBResAct;
     QAction *histoAResAct;
     QAction *histoSResAct;
+    QAction *mainAboutAct;
 
     DIPModuleBase *module;
 
@@ -86,6 +88,7 @@ public slots:
     void viewSRColorTagHideSync();
     void toggleViewSync(bool on);
     void toggleTool(bool show);
+    void about();
 
 };
 

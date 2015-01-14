@@ -293,8 +293,6 @@ int DIPModuleMM::_cz(int value)
 
 int DIPModuleMM::_diffPixels(QImage *ia, QImage *ib)
 {
-    qDebug()<<ia;
-    qDebug()<<ib;
 //    !ia || !ib || !ia->isNull() || !ib->isNull() ||
     if(ia->width() != ib->width() || ia->height() != ib->height()){
         return -1;
@@ -312,7 +310,6 @@ int DIPModuleMM::_diffPixels(QImage *ia, QImage *ib)
             }
         }
     }
-    qDebug()<<n;
     return n;
 }
 
