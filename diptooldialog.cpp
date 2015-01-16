@@ -6,7 +6,7 @@ DIPToolDialog::DIPToolDialog(QWidget *parent) :
     setWindowTitle(tr("Tool"));
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
-    rootUI = defaultUI = new QLabel(tr("Select a project"));
+    rootUI = defaultUI = new QLabel(QString("<span style=\"color:#666\"><b><i>Select a project</i></b></span>"));
     ((QLabel *)defaultUI)->setAlignment(Qt::AlignCenter);
     rootUI->setFont(QFont(tr("Microsoft YaHei"), 15));
     rootUI->setMinimumSize(180,250);

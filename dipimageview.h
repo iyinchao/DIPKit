@@ -37,7 +37,6 @@ private:
     QImage *image;
     QImage *imageOriginal;
     DIPImageLabel *label;
-    //QLabel *prompt;
     DIPElideLabel *title;
     QString *filePath;
     QGridLayout *layout;

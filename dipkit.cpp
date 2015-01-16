@@ -404,8 +404,8 @@ void DIPKit::about()
                    DIPKit is a open-source image processing toolbox created by <a href=\"http://iyinchao.cn\">Charles Yin</a>.\
                    </p>\
                    <p>\
-                       This app is using pure Qt 5 API, such as QImage, QPixelMap and is signle-threaded. The project is hosted by <a href=\"https://github.com/iyinchao/DIPKit\">Github</a>. </p>\
-            <p>You can folk and modify it under the control of the lisence <a href=\"http://creativecommons.org/licenses/by-nc/4.0/legalcode\">here</a>(CC BY-NC).\
+                       This app is using pure Qt 5 API, such as QImage, QPixmap and is signle-threaded. The project is hosted by <a href=\"https://github.com/iyinchao/DIPKit\">Github</a>. </p>\
+            <p>You can folk and modify it under the control of the license <a href=\"http://creativecommons.org/licenses/by-nc/4.0/legalcode\">here</a>(CC BY-NC).\
             </p>\
                     <h3 style=\"margin-top:-10px;\">Credit</h3>\
                     <table>\
